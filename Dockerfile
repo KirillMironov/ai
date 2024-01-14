@@ -1,0 +1,19 @@
+FROM ubuntu:24.04 as llama-builder
+RUN apt-get update && apt-get install build-essential -y
+WORKDIR /llama
+COPY ./llm/llama/llama.cpp .
+RUN make
+
+FROM golang:1.21.5 as llm-builder
+WORKDIR /ai
+COPY go.mod ./
+RUN go mod download
+COPY . .
+RUN go build -o /bin/llm ./cmd/llm
+
+FROM ubuntu:24.04
+RUN apt-get update && apt-get install wget htop -y && mkdir /models
+RUN wget -O /models/llama-2-7b-chat.Q4_K_M.gguf https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf?download=true
+COPY --from=llama-builder /llama/server /bin/llama/server
+COPY --from=llm-builder /bin/llm /bin/llm
+ENTRYPOINT ["/bin/llm"]
