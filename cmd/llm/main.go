@@ -2,55 +2,67 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"log"
-	"net/http"
+	"net"
+	"os"
+	"os/signal"
 
-	"github.com/KirillMironov/ai/llm"
+	"github.com/kelseyhightower/envconfig"
+	"google.golang.org/grpc"
+
+	"github.com/KirillMironov/ai/api"
+	"github.com/KirillMironov/ai/internal/llm"
 	"github.com/KirillMironov/ai/llm/llama"
 )
 
-func main() {
-	ctx := context.Background()
+type config struct {
+	Port int `envconfig:"PORT" default:"8081"`
 
-	llamaLLM := llama.New("/bin/llama/server", "/models/llama-2-7b-chat.Q4_K_M.gguf")
+	Llama struct {
+		ExecutablePath string `envconfig:"LLAMA_EXECUTABLE_PATH" required:"true"`
+		ModelPath      string `envconfig:"LLAMA_MODEL_PATH" required:"true"`
+	}
+}
+
+func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	// config
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal(err)
+	}
+
+	// llm
+	llamaLLM := llama.New(cfg.Llama.ExecutablePath, cfg.Llama.ModelPath)
 
 	if err := llamaLLM.Start(ctx); err != nil {
-		log.Fatalf("failed to start llama LLM: %v", err)
+		log.Fatalf("failed to start llama llm: %v", err)
 	}
 	defer llamaLLM.Close(ctx)
 
-	http.HandleFunc("/completion", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
+	// grpc server
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer listener.Close()
+
+	server := grpc.NewServer()
+	llmServer := llm.NewServer(llamaLLM)
+	api.RegisterLLMServer(server, llmServer)
+
+	go func() {
+		log.Printf("starting grpc server at %s", listener.Addr())
+		if err = server.Serve(listener); err != nil {
+			log.Fatal(err)
 		}
+	}()
 
-		var request struct {
-			Prompt string `json:"prompt"`
-		}
-
-		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			log.Println(err)
-			return
-		}
-
-		response, err := llamaLLM.Completion(r.Context(), llm.CompletionRequest{Prompt: request.Prompt})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Println(err)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-
-		if err = json.NewEncoder(w).Encode(response); err != nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
-			log.Println(err)
-		}
-	})
-
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	// graceful shutdown
+	<-ctx.Done()
+	log.Printf("shutting down grpc server")
+	server.GracefulStop()
 }
