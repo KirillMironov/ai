@@ -1,11 +1,15 @@
 package llama
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"net"
+	"net/http"
 	"os/exec"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/KirillMironov/ai/internal/httputil"
@@ -54,12 +58,41 @@ func New(executablePath, modelPath string, options ...Option) *Llama {
 func (l *Llama) Completion(ctx context.Context, request llm.CompletionRequest) (llm.CompletionResponse, error) {
 	req := completionRequest{Prompt: request.Prompt}
 
-	resp, err := httputil.Post[completionRequest, completionResponse](ctx, l.serverURL("/completion"), req)
+	resp, err := httputil.Post[completionRequest, completionResponse](ctx, l.serverURL("/completion"), http.StatusOK, req)
 	if err != nil {
 		return llm.CompletionResponse{}, err
 	}
 
 	return llm.CompletionResponse{Content: resp.Content}, nil
+}
+
+func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequest, onChunk func(llm.CompletionResponse)) error {
+	req := completionRequest{Prompt: request.Prompt, Stream: true}
+
+	body, err := httputil.PostBody[completionRequest](ctx, l.serverURL("/completion"), http.StatusOK, req)
+	if err != nil {
+		return err
+	}
+	defer body.Close()
+
+	scanner := bufio.NewScanner(body)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		var chunk completionResponseChunk
+		if err = json.Unmarshal([]byte(strings.TrimPrefix(line, "data: ")), &chunk); err != nil {
+			return err
+		}
+
+		onChunk(llm.CompletionResponse{Content: chunk.Content})
+	}
+
+	return nil
 }
 
 func (l *Llama) Start(ctx context.Context) error {
@@ -102,9 +135,14 @@ func (l *Llama) serverURL(path string) string {
 type (
 	completionRequest struct {
 		Prompt string `json:"prompt"`
+		Stream bool   `json:"stream,omitempty"`
 	}
 
 	completionResponse struct {
+		Content string `json:"content"`
+	}
+
+	completionResponseChunk struct {
 		Content string `json:"content"`
 	}
 )

@@ -4,6 +4,7 @@ import "context"
 
 type LLM interface {
 	Completion(ctx context.Context, request CompletionRequest) (CompletionResponse, error)
+	CompletionStream(ctx context.Context, request CompletionRequest, onChunk func(CompletionResponse)) error
 	Start(ctx context.Context) error
 	Close(ctx context.Context) error
 }
