@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package api;
+
 option go_package = "github.com/KirillMironov/ai/api";
 
 service LLM {

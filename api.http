@@ -1,0 +1,13 @@
+### LLM completion
+GRPC {{llm_host}}/api.LLM/Completion
+
+{
+  "prompt": "What is the most populated city in Colombia?"
+}
+
+### LLM completion stream
+GRPC {{llm_host}}/api.LLM/CompletionStream
+
+{
+  "prompt": "What is the most populated city in Colombia?"
+}
