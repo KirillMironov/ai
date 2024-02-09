@@ -2,6 +2,12 @@ package llama
 
 type Option func(llama *Llama)
 
+func WithServerHost(host string) Option {
+	return func(llama *Llama) {
+		llama.serverHost = host
+	}
+}
+
 func WithServerPort(port int) Option {
 	return func(llama *Llama) {
 		llama.serverPort = port
