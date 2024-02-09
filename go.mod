@@ -1,6 +1,6 @@
 module github.com/KirillMironov/ai
 
-go 1.21.5
+go 1.22.0
 
 require (
 	github.com/kelseyhightower/envconfig v1.4.0
