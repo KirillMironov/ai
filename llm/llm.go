@@ -4,7 +4,7 @@ import "context"
 
 type LLM interface {
 	Completion(ctx context.Context, request CompletionRequest) (CompletionResponse, error)
-	CompletionStream(ctx context.Context, request CompletionRequest, onChunk func(CompletionResponse)) error
+	CompletionStream(ctx context.Context, request CompletionRequest, onChunk func(CompletionResponse) error) error
 	Start(ctx context.Context) error
 	Close(ctx context.Context) error
 }
@@ -20,15 +20,15 @@ type (
 		Stats   Stats
 	}
 
-	//CompletionRequest struct {
+	// CompletionRequest struct {
 	//	Messages []Message
 	//	Options  Options
-	//}
+	// }
 
-	//CompletionResponse struct {
+	// CompletionResponse struct {
 	//	Message Message
 	//	Stats   Stats
-	//}
+	// }
 
 	Message struct {
 		Role    Role

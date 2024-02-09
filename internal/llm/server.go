@@ -45,8 +45,8 @@ func (s Server) CompletionStream(request *api.CompletionStreamRequest, stream ap
 
 	req := llm.CompletionRequest{Prompt: request.Prompt}
 
-	chunkProcessor := func(response llm.CompletionResponse) {
-		_ = stream.Send(&api.CompletionStreamResponse{Content: response.Content})
+	chunkProcessor := func(response llm.CompletionResponse) error {
+		return stream.Send(&api.CompletionStreamResponse{Content: response.Content})
 	}
 
 	if err := s.llm.CompletionStream(stream.Context(), req, chunkProcessor); err != nil {

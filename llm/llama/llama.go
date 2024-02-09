@@ -66,7 +66,7 @@ func (l *Llama) Completion(ctx context.Context, request llm.CompletionRequest) (
 	return llm.CompletionResponse{Content: resp.Content}, nil
 }
 
-func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequest, onChunk func(llm.CompletionResponse)) error {
+func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequest, onChunk func(llm.CompletionResponse) error) error {
 	req := completionRequest{Prompt: request.Prompt, Stream: true}
 
 	body, err := httputil.PostBody[completionRequest](ctx, l.serverURL("/completion"), http.StatusOK, req)
@@ -89,7 +89,9 @@ func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequ
 			return err
 		}
 
-		onChunk(llm.CompletionResponse{Content: chunk.Content})
+		if err = onChunk(llm.CompletionResponse{Content: chunk.Content}); err != nil {
+			return err
+		}
 	}
 
 	return nil
