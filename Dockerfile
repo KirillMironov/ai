@@ -4,7 +4,7 @@ WORKDIR /llama
 COPY ./llm/llama/llama.cpp .
 RUN make
 
-FROM golang:1.21.5 as llm-builder
+FROM golang:1.22.0 as llm-builder
 WORKDIR /ai
 COPY go.mod ./
 RUN go mod download

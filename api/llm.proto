@@ -7,13 +7,11 @@ option go_package = "github.com/KirillMironov/ai/api";
 service LLM {
   rpc Completion (CompletionRequest) returns (CompletionResponse) {}
   rpc CompletionStream (CompletionStreamRequest) returns (stream CompletionStreamResponse) {}
+  rpc ChatCompletion (ChatCompletionRequest) returns (ChatCompletionResponse) {}
+  rpc ChatCompletionStream (ChatCompletionStreamRequest) returns (stream ChatCompletionStreamResponse) {}
 }
 
 message CompletionRequest {
-  string prompt = 1;
-}
-
-message CompletionStreamRequest {
   string prompt = 1;
 }
 
@@ -21,6 +19,37 @@ message CompletionResponse {
   string content = 1;
 }
 
+message CompletionStreamRequest {
+  string prompt = 1;
+}
+
 message CompletionStreamResponse {
   string content = 1;
+}
+
+message ChatCompletionRequest {
+  repeated Message messages = 1;
+}
+
+message ChatCompletionResponse {
+  Message message = 1;
+}
+
+message ChatCompletionStreamRequest {
+  repeated Message messages = 1;
+}
+
+message ChatCompletionStreamResponse {
+  Message message = 1;
+}
+
+message Message {
+  Role role = 1;
+  string content = 2;
+}
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_LLM = 1;
+  ROLE_USER = 2;
 }

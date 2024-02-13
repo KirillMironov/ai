@@ -5,39 +5,33 @@ import "context"
 type LLM interface {
 	Completion(ctx context.Context, request CompletionRequest) (CompletionResponse, error)
 	CompletionStream(ctx context.Context, request CompletionRequest, onChunk func(CompletionResponse) error) error
+	ChatCompletion(ctx context.Context, request ChatCompletionRequest) (ChatCompletionResponse, error)
+	ChatCompletionStream(ctx context.Context, request ChatCompletionRequest, onChunk func(ChatCompletionResponse) error) error
 	Start(ctx context.Context) error
 	Close(ctx context.Context) error
 }
 
 type (
 	CompletionRequest struct {
-		Prompt  string
-		Options Options
+		Prompt string
 	}
 
 	CompletionResponse struct {
 		Content string
-		Stats   Stats
 	}
 
-	// CompletionRequest struct {
-	//	Messages []Message
-	//	Options  Options
-	// }
+	ChatCompletionRequest struct {
+		Messages []Message
+	}
 
-	// CompletionResponse struct {
-	//	Message Message
-	//	Stats   Stats
-	// }
+	ChatCompletionResponse struct {
+		Message Message
+	}
 
 	Message struct {
 		Role    Role
 		Content string
 	}
-
-	Options map[string]string
-
-	Stats map[string]string
 )
 
 type Role uint8

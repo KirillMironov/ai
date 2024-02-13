@@ -69,7 +69,7 @@ func (l *Llama) Completion(ctx context.Context, request llm.CompletionRequest) (
 func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequest, onChunk func(llm.CompletionResponse) error) error {
 	req := completionRequest{Prompt: request.Prompt, Stream: true}
 
-	body, err := httputil.PostBody[completionRequest](ctx, l.serverURL("/completion"), http.StatusOK, req)
+	body, err := httputil.PostBody(ctx, l.serverURL("/completion"), http.StatusOK, req)
 	if err != nil {
 		return err
 	}
@@ -90,6 +90,58 @@ func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequ
 		}
 
 		if err = onChunk(llm.CompletionResponse{Content: chunk.Content}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (l *Llama) ChatCompletion(ctx context.Context, request llm.ChatCompletionRequest) (llm.ChatCompletionResponse, error) {
+	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages)}
+
+	resp, err := httputil.Post[chatCompletionRequest, chatCompletionResponse](ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
+	if err != nil {
+		return llm.ChatCompletionResponse{}, err
+	}
+
+	if len(resp.Choices) == 0 {
+		return llm.ChatCompletionResponse{}, nil
+	}
+
+	return llm.ChatCompletionResponse{Message: messageFromLlamaMessage(resp.Choices[0].Message)}, nil
+}
+
+func (l *Llama) ChatCompletionStream(ctx context.Context, request llm.ChatCompletionRequest, onChunk func(llm.ChatCompletionResponse) error) error {
+	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages), Stream: true}
+
+	body, err := httputil.PostBody(ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
+	if err != nil {
+		return err
+	}
+	defer body.Close()
+
+	scanner := bufio.NewScanner(body)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		var chunk chatCompletionResponseChunk
+		if err = json.Unmarshal([]byte(strings.TrimPrefix(line, "data: ")), &chunk); err != nil {
+			return err
+		}
+
+		if len(chunk.Choices) == 0 {
+			continue
+		}
+
+		response := llm.ChatCompletionResponse{Message: messageFromLlamaMessage(chunk.Choices[0].Message)}
+
+		if err = onChunk(response); err != nil {
 			return err
 		}
 	}
@@ -134,17 +186,42 @@ func (l *Llama) serverURL(path string) string {
 	return "http://" + net.JoinHostPort("localhost", strconv.Itoa(l.serverPort)) + path
 }
 
-type (
-	completionRequest struct {
-		Prompt string `json:"prompt"`
-		Stream bool   `json:"stream,omitempty"`
+func messagesToLlamaMessages(messages []llm.Message) []message {
+	llamaMessages := make([]message, 0, len(messages))
+	for _, msg := range messages {
+		llamaMessages = append(llamaMessages, message{
+			Role:    roleToLlamaRole(msg.Role),
+			Content: msg.Content,
+		})
 	}
+	return llamaMessages
+}
 
-	completionResponse struct {
-		Content string `json:"content"`
+func messageFromLlamaMessage(message message) llm.Message {
+	return llm.Message{
+		Role:    roleFromLlamaRole(message.Role),
+		Content: message.Content,
 	}
+}
 
-	completionResponseChunk struct {
-		Content string `json:"content"`
+func roleToLlamaRole(role llm.Role) role {
+	switch role {
+	case llm.RoleLLM:
+		return roleAssistant
+	case llm.RoleUser:
+		return roleUser
+	default:
+		return 0
 	}
-)
+}
+
+func roleFromLlamaRole(role role) llm.Role {
+	switch role {
+	case roleAssistant:
+		return llm.RoleLLM
+	case roleUser:
+		return llm.RoleUser
+	default:
+		return 0
+	}
+}

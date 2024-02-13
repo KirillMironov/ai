@@ -11,3 +11,43 @@ GRPC {{llm_host}}/api.LLM/CompletionStream
 {
   "prompt": "What is the most populated city in Colombia?"
 }
+
+### LLM chat completion
+GRPC {{llm_host}}/api.LLM/ChatCompletion
+
+{
+  "messages": [
+    {
+      "role": "ROLE_USER",
+      "content": "What is the most populated city in Colombia?"
+    },
+    {
+      "role": "ROLE_LLM",
+      "content": "The most populated city in Colombia is Bogotá, with a population of over 7 million people."
+    },
+    {
+      "role": "ROLE_USER",
+      "content": "Thanks! I'm planning a trip there and wanted to know more about the local attractions."
+    }
+  ]
+}
+
+### LLM chat completion stream
+GRPC {{llm_host}}/api.LLM/ChatCompletionStream
+
+{
+  "messages": [
+    {
+      "role": "ROLE_USER",
+      "content": "What is the most populated city in Colombia?"
+    },
+    {
+      "role": "ROLE_LLM",
+      "content": "The most populated city in Colombia is Bogotá, with a population of over 7 million people."
+    },
+    {
+      "role": "ROLE_USER",
+      "content": "Thanks! I'm planning a trip there and wanted to know more about the local attractions."
+    }
+  ]
+}
