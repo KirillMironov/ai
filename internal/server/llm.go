@@ -1,4 +1,4 @@
-package llm
+package server
 
 import (
 	"context"
@@ -17,23 +17,23 @@ var (
 	errNoMessages  = status.Error(codes.InvalidArgument, "no messages")
 )
 
-type Server struct {
+type LLM struct {
 	llm llm.LLM
 	api.UnimplementedLLMServer
 }
 
-func NewServer(llm llm.LLM) Server {
-	return Server{llm: llm}
+func NewLLM(llm llm.LLM) LLM {
+	return LLM{llm: llm}
 }
 
-func (s Server) Completion(ctx context.Context, request *api.CompletionRequest) (*api.CompletionResponse, error) {
+func (l LLM) Completion(ctx context.Context, request *api.CompletionRequest) (*api.CompletionResponse, error) {
 	if request.Prompt == "" {
 		return nil, errEmptyPrompt
 	}
 
 	req := llm.CompletionRequest{Prompt: request.Prompt}
 
-	resp, err := s.llm.Completion(ctx, req)
+	resp, err := l.llm.Completion(ctx, req)
 	if err != nil {
 		slog.Error("failed to call llm.Completion", err)
 		return nil, err
@@ -42,7 +42,7 @@ func (s Server) Completion(ctx context.Context, request *api.CompletionRequest) 
 	return &api.CompletionResponse{Content: resp.Content}, nil
 }
 
-func (s Server) CompletionStream(request *api.CompletionStreamRequest, stream api.LLM_CompletionStreamServer) error {
+func (l LLM) CompletionStream(request *api.CompletionStreamRequest, stream api.LLM_CompletionStreamServer) error {
 	if request.Prompt == "" {
 		return errEmptyPrompt
 	}
@@ -53,7 +53,7 @@ func (s Server) CompletionStream(request *api.CompletionStreamRequest, stream ap
 		return stream.Send(&api.CompletionStreamResponse{Content: response.Content})
 	}
 
-	if err := s.llm.CompletionStream(stream.Context(), req, onChunk); err != nil {
+	if err := l.llm.CompletionStream(stream.Context(), req, onChunk); err != nil {
 		slog.Error("failed to call llm.CompletionStream", err)
 		return err
 	}
@@ -61,7 +61,7 @@ func (s Server) CompletionStream(request *api.CompletionStreamRequest, stream ap
 	return nil
 }
 
-func (s Server) ChatCompletion(ctx context.Context, request *api.ChatCompletionRequest) (*api.ChatCompletionResponse, error) {
+func (l LLM) ChatCompletion(ctx context.Context, request *api.ChatCompletionRequest) (*api.ChatCompletionResponse, error) {
 	if len(request.Messages) == 0 {
 		return nil, errNoMessages
 	}
@@ -71,7 +71,7 @@ func (s Server) ChatCompletion(ctx context.Context, request *api.ChatCompletionR
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	resp, err := s.llm.ChatCompletion(ctx, llm.ChatCompletionRequest{Messages: messages})
+	resp, err := l.llm.ChatCompletion(ctx, llm.ChatCompletionRequest{Messages: messages})
 	if err != nil {
 		slog.Error("failed to call llm.ChatCompletion", err)
 		return nil, err
@@ -80,7 +80,7 @@ func (s Server) ChatCompletion(ctx context.Context, request *api.ChatCompletionR
 	return &api.ChatCompletionResponse{Message: messageToAPI(resp.Message)}, nil
 }
 
-func (s Server) ChatCompletionStream(request *api.ChatCompletionStreamRequest, stream api.LLM_ChatCompletionStreamServer) error {
+func (l LLM) ChatCompletionStream(request *api.ChatCompletionStreamRequest, stream api.LLM_ChatCompletionStreamServer) error {
 	if len(request.Messages) == 0 {
 		return errNoMessages
 	}
@@ -96,7 +96,7 @@ func (s Server) ChatCompletionStream(request *api.ChatCompletionStreamRequest, s
 		return stream.Send(&api.ChatCompletionStreamResponse{Message: messageToAPI(response.Message)})
 	}
 
-	if err = s.llm.ChatCompletionStream(stream.Context(), req, onChunk); err != nil {
+	if err = l.llm.ChatCompletionStream(stream.Context(), req, onChunk); err != nil {
 		slog.Error("failed to call llm.ChatCompletionStream", err)
 		return err
 	}

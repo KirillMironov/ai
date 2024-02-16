@@ -16,8 +16,8 @@ import (
 	_ "modernc.org/sqlite"
 
 	"github.com/KirillMironov/ai/api"
-	"github.com/KirillMironov/ai/internal/ai"
 	"github.com/KirillMironov/ai/internal/model"
+	"github.com/KirillMironov/ai/internal/server"
 	"github.com/KirillMironov/ai/internal/service"
 	"github.com/KirillMironov/ai/internal/storage"
 	"github.com/KirillMironov/ai/internal/token"
@@ -84,13 +84,13 @@ func main() {
 	}
 	defer listener.Close()
 
-	server := grpc.NewServer()
-	authenticatorServer := ai.NewAuthenticatorServer(authenticator)
-	api.RegisterAuthenticatorServer(server, authenticatorServer)
+	grpcServer := grpc.NewServer()
+	authenticatorServer := server.NewAuthenticator(authenticator)
+	api.RegisterAuthenticatorServer(grpcServer, authenticatorServer)
 
 	go func() {
 		log.Printf("starting grpc server at %s", listener.Addr())
-		if err = server.Serve(listener); err != nil {
+		if err = grpcServer.Serve(listener); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -98,5 +98,5 @@ func main() {
 	// graceful shutdown
 	<-ctx.Done()
 	log.Printf("shutting down grpc server")
-	server.GracefulStop()
+	grpcServer.GracefulStop()
 }

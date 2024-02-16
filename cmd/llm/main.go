@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/KirillMironov/ai/api"
-	"github.com/KirillMironov/ai/internal/llm"
+	"github.com/KirillMironov/ai/internal/server"
 	"github.com/KirillMironov/ai/llm/llama"
 )
 
@@ -50,13 +50,13 @@ func main() {
 	}
 	defer listener.Close()
 
-	server := grpc.NewServer()
-	llmServer := llm.NewServer(llamaLLM)
-	api.RegisterLLMServer(server, llmServer)
+	grpcServer := grpc.NewServer()
+	llmServer := server.NewLLM(llamaLLM)
+	api.RegisterLLMServer(grpcServer, llmServer)
 
 	go func() {
 		log.Printf("starting grpc server at %s", listener.Addr())
-		if err = server.Serve(listener); err != nil {
+		if err = grpcServer.Serve(listener); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -64,5 +64,5 @@ func main() {
 	// graceful shutdown
 	<-ctx.Done()
 	log.Printf("shutting down grpc server")
-	server.GracefulStop()
+	grpcServer.GracefulStop()
 }
