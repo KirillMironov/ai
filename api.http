@@ -51,3 +51,19 @@ GRPC {{llm_host}}/api.LLM/ChatCompletionStream
     }
   ]
 }
+
+### AI sign up
+GRPC {{ai_host}}/api.Authenticator/SignUp
+
+{
+  "username": "username",
+  "password": "password"
+}
+
+### AI sign in
+GRPC {{ai_host}}/api.Authenticator/SignIn
+
+{
+  "username": "username",
+  "password": "password"
+}

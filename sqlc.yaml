@@ -1,0 +1,17 @@
+version: "2"
+
+sql:
+  - engine: "sqlite"
+    queries: "queries"
+    schema: "migrations"
+    gen:
+      go:
+        package: "queries"
+        out: "internal/storage/queries"
+        overrides:
+          - column: "users.id"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "users.created_at"
+            go_type: "time.Time"
