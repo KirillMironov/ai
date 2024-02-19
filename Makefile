@@ -2,7 +2,7 @@ test:
 	go test ./...
 
 generate:
-	go generate
+	MODULE=github.com/KirillMironov/ai go generate
 
 lint:
 	golangci-lint run

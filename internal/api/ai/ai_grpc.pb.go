@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v4.25.2
-// source: api/ai/ai.proto
+// source: api/ai.proto
 
 package api
 
@@ -137,7 +137,7 @@ var Authenticator_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/ai/ai.proto",
+	Metadata: "api/ai.proto",
 }
 
 // ConversationsClient is the client API for Conversations service.
@@ -323,5 +323,5 @@ var Conversations_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "api/ai/ai.proto",
+	Metadata: "api/ai.proto",
 }

@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/KirillMironov/ai/api/llm"
+	"github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/llm"
 )
 

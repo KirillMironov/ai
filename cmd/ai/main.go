@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 	_ "modernc.org/sqlite"
 
-	"github.com/KirillMironov/ai/api/ai"
+	"github.com/KirillMironov/ai/internal/api/ai"
 	"github.com/KirillMironov/ai/internal/logger"
 	"github.com/KirillMironov/ai/internal/model"
 	"github.com/KirillMironov/ai/internal/server"

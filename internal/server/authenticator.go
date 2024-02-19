@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/KirillMironov/ai/api/ai"
+	"github.com/KirillMironov/ai/internal/api/ai"
 )
 
 type authenticatorService interface {

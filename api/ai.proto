@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "github.com/KirillMironov/ai/api/ai;api";
+option go_package = "github.com/KirillMironov/ai/internal/api/ai;api";
 
 service Authenticator {
   rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
