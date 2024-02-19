@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"log/slog"
 	"net"
 	"os"
@@ -40,6 +39,13 @@ type config struct {
 }
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -49,7 +55,7 @@ func main() {
 	// config
 	var cfg config
 	if err := envconfig.Process("", &cfg); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// db
@@ -57,22 +63,22 @@ func main() {
 
 	db, err := sql.Open("sqlite", dataSourceURI)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer db.Close()
 
 	if err = db.Ping(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// migrations
 	provider, err := goose.NewProvider(goose.DialectSQLite3, db, migrations.Embed)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if _, err = provider.Up(ctx); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// storage
@@ -85,7 +91,7 @@ func main() {
 	// grpc server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer listener.Close()
 
@@ -94,14 +100,17 @@ func main() {
 	api.RegisterAuthenticatorServer(grpcServer, authenticatorServer)
 
 	go func() {
-		log.Printf("starting grpc server at %s", listener.Addr())
+		slog.Info("starting grpc server", slog.String("address", listener.Addr().String()))
 		if err = grpcServer.Serve(listener); err != nil {
-			log.Fatal(err)
+			slog.Error(err.Error())
+			cancel()
 		}
 	}()
 
 	// graceful shutdown
 	<-ctx.Done()
-	log.Printf("shutting down grpc server")
+	slog.Info("shutting down grpc server")
 	grpcServer.GracefulStop()
+
+	return nil
 }
