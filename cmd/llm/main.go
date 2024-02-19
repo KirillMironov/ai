@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/KirillMironov/ai/api"
+	"github.com/KirillMironov/ai/internal/logger"
 	"github.com/KirillMironov/ai/internal/server"
 	"github.com/KirillMironov/ai/llm/llama"
 )
@@ -28,6 +30,9 @@ type config struct {
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
+
+	// logger
+	slog.SetDefault(logger.New())
 
 	// config
 	var cfg config
