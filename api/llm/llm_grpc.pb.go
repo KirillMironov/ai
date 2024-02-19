@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v4.25.2
-// source: api/llm.proto
+// source: api/llm/llm.proto
 
 package api
 
@@ -264,5 +264,5 @@ var LLM_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "api/llm.proto",
+	Metadata: "api/llm/llm.proto",
 }

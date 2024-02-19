@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "github.com/KirillMironov/ai/api/ai;api";
+
+service Authenticator {
+  rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
+  rpc SignIn (SignInRequest) returns (SignInResponse) {}
+}
+
+message SignUpRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message SignUpResponse {
+  string token = 1;
+}
+
+message SignInRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message SignInResponse {
+  string token = 1;
+}
+
+service Conversations {
+  rpc ListConversations (ListConversationsRequest) returns (ListConversationsResponse) {}
+  rpc GetConversation (GetConversationRequest) returns (GetConversationResponse) {}
+  rpc SendMessage (SendMessageRequest) returns (stream SendMessageResponse) {}
+}
+
+message ListConversationsRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message ListConversationsResponse {
+  repeated Conversation conversations = 1;
+}
+
+message GetConversationRequest {
+  string id = 1;
+}
+
+message GetConversationResponse {
+  string title = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+  repeated Message messages = 4;
+}
+
+message SendMessageRequest {
+  string conversation_id = 1;
+  Message message = 2;
+}
+
+message SendMessageResponse {
+  Message message = 1;
+}
+
+message Conversation {
+  string id = 1;
+  string title = 2;
+  int64 created_at = 3;
+  int64 updated_at = 4;
+}
+
+message Message {
+  string id = 1;
+  string role = 2;
+  string content = 3;
+}

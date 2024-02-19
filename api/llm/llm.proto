@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "github.com/KirillMironov/ai/api";
+option go_package = "github.com/KirillMironov/ai/api/llm;api";
 
 service LLM {
   rpc Completion (CompletionRequest) returns (CompletionResponse) {}
