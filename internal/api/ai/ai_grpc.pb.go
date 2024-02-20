@@ -36,7 +36,7 @@ func NewAuthenticatorClient(cc grpc.ClientConnInterface) AuthenticatorClient {
 
 func (c *authenticatorClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error) {
 	out := new(SignUpResponse)
-	err := c.cc.Invoke(ctx, "/api.Authenticator/SignUp", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ai.Authenticator/SignUp", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *authenticatorClient) SignUp(ctx context.Context, in *SignUpRequest, opt
 
 func (c *authenticatorClient) SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
 	out := new(SignInResponse)
-	err := c.cc.Invoke(ctx, "/api.Authenticator/SignIn", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ai.Authenticator/SignIn", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func _Authenticator_SignUp_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Authenticator/SignUp",
+		FullMethod: "/ai.Authenticator/SignUp",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticatorServer).SignUp(ctx, req.(*SignUpRequest))
@@ -112,7 +112,7 @@ func _Authenticator_SignIn_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Authenticator/SignIn",
+		FullMethod: "/ai.Authenticator/SignIn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticatorServer).SignIn(ctx, req.(*SignInRequest))
@@ -124,7 +124,7 @@ func _Authenticator_SignIn_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Authenticator_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.Authenticator",
+	ServiceName: "ai.Authenticator",
 	HandlerType: (*AuthenticatorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -160,7 +160,7 @@ func NewConversationsClient(cc grpc.ClientConnInterface) ConversationsClient {
 
 func (c *conversationsClient) ListConversations(ctx context.Context, in *ListConversationsRequest, opts ...grpc.CallOption) (*ListConversationsResponse, error) {
 	out := new(ListConversationsResponse)
-	err := c.cc.Invoke(ctx, "/api.Conversations/ListConversations", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ai.Conversations/ListConversations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (c *conversationsClient) ListConversations(ctx context.Context, in *ListCon
 
 func (c *conversationsClient) GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error) {
 	out := new(GetConversationResponse)
-	err := c.cc.Invoke(ctx, "/api.Conversations/GetConversation", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ai.Conversations/GetConversation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (c *conversationsClient) GetConversation(ctx context.Context, in *GetConver
 
 func (c *conversationsClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
 	out := new(SendMessageResponse)
-	err := c.cc.Invoke(ctx, "/api.Conversations/SendMessage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ai.Conversations/SendMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (c *conversationsClient) SendMessage(ctx context.Context, in *SendMessageRe
 }
 
 func (c *conversationsClient) SendMessageStream(ctx context.Context, in *SendMessageStreamRequest, opts ...grpc.CallOption) (Conversations_SendMessageStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Conversations_ServiceDesc.Streams[0], "/api.Conversations/SendMessageStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &Conversations_ServiceDesc.Streams[0], "/ai.Conversations/SendMessageStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func _Conversations_ListConversations_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Conversations/ListConversations",
+		FullMethod: "/ai.Conversations/ListConversations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ConversationsServer).ListConversations(ctx, req.(*ListConversationsRequest))
@@ -285,7 +285,7 @@ func _Conversations_GetConversation_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Conversations/GetConversation",
+		FullMethod: "/ai.Conversations/GetConversation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ConversationsServer).GetConversation(ctx, req.(*GetConversationRequest))
@@ -303,7 +303,7 @@ func _Conversations_SendMessage_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.Conversations/SendMessage",
+		FullMethod: "/ai.Conversations/SendMessage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ConversationsServer).SendMessage(ctx, req.(*SendMessageRequest))
@@ -336,7 +336,7 @@ func (x *conversationsSendMessageStreamServer) Send(m *SendMessageStreamResponse
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Conversations_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.Conversations",
+	ServiceName: "ai.Conversations",
 	HandlerType: (*ConversationsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

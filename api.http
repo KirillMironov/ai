@@ -1,19 +1,19 @@
 ### LLM completion
-GRPC {{llm_host}}/api.LLM/Completion
+GRPC {{llm_host}}/llm.LLM/Completion
 
 {
   "prompt": "What is the most populated city in Colombia?"
 }
 
 ### LLM completion stream
-GRPC {{llm_host}}/api.LLM/CompletionStream
+GRPC {{llm_host}}/llm.LLM/CompletionStream
 
 {
   "prompt": "What is the most populated city in Colombia?"
 }
 
 ### LLM chat completion
-GRPC {{llm_host}}/api.LLM/ChatCompletion
+GRPC {{llm_host}}/llm.LLM/ChatCompletion
 
 {
   "messages": [
@@ -33,7 +33,7 @@ GRPC {{llm_host}}/api.LLM/ChatCompletion
 }
 
 ### LLM chat completion stream
-GRPC {{llm_host}}/api.LLM/ChatCompletionStream
+GRPC {{llm_host}}/llm.LLM/ChatCompletionStream
 
 {
   "messages": [
@@ -53,7 +53,7 @@ GRPC {{llm_host}}/api.LLM/ChatCompletionStream
 }
 
 ### AI sign up
-GRPC {{ai_host}}/api.Authenticator/SignUp
+GRPC {{ai_host}}/ai.Authenticator/SignUp
 
 {
   "username": "username",
@@ -61,7 +61,7 @@ GRPC {{ai_host}}/api.Authenticator/SignUp
 }
 
 ### AI sign in
-GRPC {{ai_host}}/api.Authenticator/SignIn
+GRPC {{ai_host}}/ai.Authenticator/SignIn
 
 {
   "username": "username",

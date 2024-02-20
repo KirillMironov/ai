@@ -38,7 +38,7 @@ func NewLLMClient(cc grpc.ClientConnInterface) LLMClient {
 
 func (c *lLMClient) Completion(ctx context.Context, in *CompletionRequest, opts ...grpc.CallOption) (*CompletionResponse, error) {
 	out := new(CompletionResponse)
-	err := c.cc.Invoke(ctx, "/api.LLM/Completion", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llm.LLM/Completion", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *lLMClient) Completion(ctx context.Context, in *CompletionRequest, opts 
 }
 
 func (c *lLMClient) CompletionStream(ctx context.Context, in *CompletionStreamRequest, opts ...grpc.CallOption) (LLM_CompletionStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LLM_ServiceDesc.Streams[0], "/api.LLM/CompletionStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &LLM_ServiceDesc.Streams[0], "/llm.LLM/CompletionStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (x *lLMCompletionStreamClient) Recv() (*CompletionStreamResponse, error) {
 
 func (c *lLMClient) ChatCompletion(ctx context.Context, in *ChatCompletionRequest, opts ...grpc.CallOption) (*ChatCompletionResponse, error) {
 	out := new(ChatCompletionResponse)
-	err := c.cc.Invoke(ctx, "/api.LLM/ChatCompletion", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llm.LLM/ChatCompletion", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *lLMClient) ChatCompletion(ctx context.Context, in *ChatCompletionReques
 }
 
 func (c *lLMClient) ChatCompletionStream(ctx context.Context, in *ChatCompletionStreamRequest, opts ...grpc.CallOption) (LLM_ChatCompletionStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &LLM_ServiceDesc.Streams[1], "/api.LLM/ChatCompletionStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &LLM_ServiceDesc.Streams[1], "/llm.LLM/ChatCompletionStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func _LLM_Completion_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.LLM/Completion",
+		FullMethod: "/llm.LLM/Completion",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LLMServer).Completion(ctx, req.(*CompletionRequest))
@@ -207,7 +207,7 @@ func _LLM_ChatCompletion_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.LLM/ChatCompletion",
+		FullMethod: "/llm.LLM/ChatCompletion",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LLMServer).ChatCompletion(ctx, req.(*ChatCompletionRequest))
@@ -240,7 +240,7 @@ func (x *lLMChatCompletionStreamServer) Send(m *ChatCompletionStreamResponse) er
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LLM_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.LLM",
+	ServiceName: "llm.LLM",
 	HandlerType: (*LLMServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

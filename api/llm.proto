@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package api;
+package llm;
 
 option go_package = "github.com/KirillMironov/ai/internal/api/llm;api";
 
