@@ -6,12 +6,25 @@ package queries
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
+type Conversation struct {
+	ID        string
+	UserID    string
+	Title     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Message struct {
+	ID             string
+	ConversationID string
+	Role           int64
+	Content        string
+}
+
 type User struct {
-	ID             uuid.UUID
+	ID             string
 	Username       string
 	HashedPassword string
 	CreatedAt      time.Time

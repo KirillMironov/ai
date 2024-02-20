@@ -13,9 +13,11 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pressly/goose/v3"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	_ "modernc.org/sqlite"
 
 	"github.com/KirillMironov/ai/internal/api/ai"
+	llm "github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/internal/logger"
 	"github.com/KirillMironov/ai/internal/model"
 	"github.com/KirillMironov/ai/internal/server"
@@ -35,6 +37,11 @@ type config struct {
 	JWT struct {
 		Secret   string        `envconfig:"JWT_SECRET" required:"true"`
 		TokenTTL time.Duration `envconfig:"JWT_TOKEN_TTL" default:"24h"`
+	}
+
+	LLM struct {
+		Address  string `envconfig:"LLM_ADDRESS" required:"true"`
+		Insecure bool   `envconfig:"LLM_INSECURE" default:"true"`
 	}
 }
 
@@ -83,10 +90,26 @@ func run() error {
 
 	// storage
 	usersStorage := storage.NewUsers(db)
+	conversationsStorage := storage.NewConversations(db)
+	messagesStorage := storage.NewMessages(db)
 
-	// authenticator
+	// llm client
+	var opts []grpc.DialOption
+	if cfg.LLM.Insecure {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+
+	conn, err := grpc.Dial(cfg.LLM.Address, opts...)
+	if err != nil {
+		return err
+	}
+
+	llmClient := llm.NewLLMClient(conn)
+
+	// services
 	tokenManager := token.NewManager[model.TokenPayload]([]byte(cfg.JWT.Secret), cfg.JWT.TokenTTL)
 	authenticator := service.NewAuthenticator(usersStorage, tokenManager)
+	conversations := service.NewConversations(authenticator, conversationsStorage, messagesStorage, llmClient)
 
 	// grpc server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
@@ -97,7 +120,9 @@ func run() error {
 
 	grpcServer := grpc.NewServer()
 	authenticatorServer := server.NewAuthenticator(authenticator)
+	conversationsServer := server.NewConversations(conversations)
 	api.RegisterAuthenticatorServer(grpcServer, authenticatorServer)
+	api.RegisterConversationsServer(grpcServer, conversationsServer)
 
 	go func() {
 		slog.Info("starting grpc server", slog.String("address", listener.Addr().String()))

@@ -146,7 +146,8 @@ var Authenticator_ServiceDesc = grpc.ServiceDesc{
 type ConversationsClient interface {
 	ListConversations(ctx context.Context, in *ListConversationsRequest, opts ...grpc.CallOption) (*ListConversationsResponse, error)
 	GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error)
-	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (Conversations_SendMessageClient, error)
+	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	SendMessageStream(ctx context.Context, in *SendMessageStreamRequest, opts ...grpc.CallOption) (Conversations_SendMessageStreamClient, error)
 }
 
 type conversationsClient struct {
@@ -175,12 +176,21 @@ func (c *conversationsClient) GetConversation(ctx context.Context, in *GetConver
 	return out, nil
 }
 
-func (c *conversationsClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (Conversations_SendMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Conversations_ServiceDesc.Streams[0], "/api.Conversations/SendMessage", opts...)
+func (c *conversationsClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
+	out := new(SendMessageResponse)
+	err := c.cc.Invoke(ctx, "/api.Conversations/SendMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &conversationsSendMessageClient{stream}
+	return out, nil
+}
+
+func (c *conversationsClient) SendMessageStream(ctx context.Context, in *SendMessageStreamRequest, opts ...grpc.CallOption) (Conversations_SendMessageStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Conversations_ServiceDesc.Streams[0], "/api.Conversations/SendMessageStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &conversationsSendMessageStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -190,17 +200,17 @@ func (c *conversationsClient) SendMessage(ctx context.Context, in *SendMessageRe
 	return x, nil
 }
 
-type Conversations_SendMessageClient interface {
-	Recv() (*SendMessageResponse, error)
+type Conversations_SendMessageStreamClient interface {
+	Recv() (*SendMessageStreamResponse, error)
 	grpc.ClientStream
 }
 
-type conversationsSendMessageClient struct {
+type conversationsSendMessageStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *conversationsSendMessageClient) Recv() (*SendMessageResponse, error) {
-	m := new(SendMessageResponse)
+func (x *conversationsSendMessageStreamClient) Recv() (*SendMessageStreamResponse, error) {
+	m := new(SendMessageStreamResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -213,7 +223,8 @@ func (x *conversationsSendMessageClient) Recv() (*SendMessageResponse, error) {
 type ConversationsServer interface {
 	ListConversations(context.Context, *ListConversationsRequest) (*ListConversationsResponse, error)
 	GetConversation(context.Context, *GetConversationRequest) (*GetConversationResponse, error)
-	SendMessage(*SendMessageRequest, Conversations_SendMessageServer) error
+	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	SendMessageStream(*SendMessageStreamRequest, Conversations_SendMessageStreamServer) error
 	mustEmbedUnimplementedConversationsServer()
 }
 
@@ -227,8 +238,11 @@ func (UnimplementedConversationsServer) ListConversations(context.Context, *List
 func (UnimplementedConversationsServer) GetConversation(context.Context, *GetConversationRequest) (*GetConversationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConversation not implemented")
 }
-func (UnimplementedConversationsServer) SendMessage(*SendMessageRequest, Conversations_SendMessageServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+func (UnimplementedConversationsServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedConversationsServer) SendMessageStream(*SendMessageStreamRequest, Conversations_SendMessageStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendMessageStream not implemented")
 }
 func (UnimplementedConversationsServer) mustEmbedUnimplementedConversationsServer() {}
 
@@ -279,24 +293,42 @@ func _Conversations_GetConversation_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Conversations_SendMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SendMessageRequest)
+func _Conversations_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationsServer).SendMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Conversations/SendMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationsServer).SendMessage(ctx, req.(*SendMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversations_SendMessageStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SendMessageStreamRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ConversationsServer).SendMessage(m, &conversationsSendMessageServer{stream})
+	return srv.(ConversationsServer).SendMessageStream(m, &conversationsSendMessageStreamServer{stream})
 }
 
-type Conversations_SendMessageServer interface {
-	Send(*SendMessageResponse) error
+type Conversations_SendMessageStreamServer interface {
+	Send(*SendMessageStreamResponse) error
 	grpc.ServerStream
 }
 
-type conversationsSendMessageServer struct {
+type conversationsSendMessageStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *conversationsSendMessageServer) Send(m *SendMessageResponse) error {
+func (x *conversationsSendMessageStreamServer) Send(m *SendMessageStreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -315,11 +347,15 @@ var Conversations_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetConversation",
 			Handler:    _Conversations_GetConversation_Handler,
 		},
+		{
+			MethodName: "SendMessage",
+			Handler:    _Conversations_SendMessage_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "SendMessage",
-			Handler:       _Conversations_SendMessage_Handler,
+			StreamName:    "SendMessageStream",
+			Handler:       _Conversations_SendMessageStream_Handler,
 			ServerStreams: true,
 		},
 	},

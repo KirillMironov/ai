@@ -30,7 +30,8 @@ message SignInResponse {
 service Conversations {
   rpc ListConversations (ListConversationsRequest) returns (ListConversationsResponse) {}
   rpc GetConversation (GetConversationRequest) returns (GetConversationResponse) {}
-  rpc SendMessage (SendMessageRequest) returns (stream SendMessageResponse) {}
+  rpc SendMessage (SendMessageRequest) returns (SendMessageResponse) {}
+  rpc SendMessageStream (SendMessageStreamRequest) returns (stream SendMessageStreamResponse) {}
 }
 
 message ListConversationsRequest {
@@ -47,18 +48,27 @@ message GetConversationRequest {
 }
 
 message GetConversationResponse {
-  string title = 1;
-  int64 created_at = 2;
-  int64 updated_at = 3;
-  repeated Message messages = 4;
+  Conversation conversation = 1;
+  repeated Message messages = 2;
 }
 
 message SendMessageRequest {
   string conversation_id = 1;
-  Message message = 2;
+  string role = 2;
+  string content = 3;
 }
 
 message SendMessageResponse {
+  Message message = 1;
+}
+
+message SendMessageStreamRequest {
+  string conversation_id = 1;
+  string role = 2;
+  string content = 3;
+}
+
+message SendMessageStreamResponse {
   Message message = 1;
 }
 

@@ -55,7 +55,7 @@ func (a Authenticator) SignUp(ctx context.Context, username, password string) (t
 	}
 
 	user := model.User{
-		ID:             uuid.New(),
+		ID:             uuid.NewString(),
 		Username:       username,
 		HashedPassword: string(hashedPassword),
 		CreatedAt:      time.Now(),
@@ -86,6 +86,14 @@ func (a Authenticator) SignIn(ctx context.Context, username, password string) (t
 	}
 
 	return a.generateToken(user)
+}
+
+func (a Authenticator) Authenticate(token string) (model.TokenPayload, error) {
+	if token == "" {
+		return model.TokenPayload{}, errors.New("empty token")
+	}
+
+	return a.tokenManager.ParseToken(token)
 }
 
 func (a Authenticator) generateToken(user model.User) (token string, err error) {

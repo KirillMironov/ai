@@ -8,8 +8,6 @@ package queries
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const getUserByUsername = `-- name: GetUserByUsername :one
@@ -33,7 +31,7 @@ INSERT INTO users (id, username, hashed_password, created_at) VALUES (?, ?, ?, ?
 `
 
 type SaveUserParams struct {
-	ID             uuid.UUID
+	ID             string
 	Username       string
 	HashedPassword string
 	CreatedAt      time.Time
