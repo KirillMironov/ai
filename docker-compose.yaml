@@ -1,0 +1,37 @@
+version: "3.8"
+
+name: "ai"
+
+services:
+  llm:
+    container_name: llm
+    build:
+      dockerfile: ./Dockerfile.llm
+    ports:
+      - "8081:8081"
+    environment:
+      - LLAMA_EXECUTABLE_PATH=/bin/llama/server
+      - LLAMA_MODEL_PATH=/models/llama-2-7b-chat.Q4_K_M.gguf
+    networks:
+      ai:
+
+  ai:
+    container_name: ai
+    build:
+      dockerfile: ./Dockerfile.ai
+    ports:
+      - "8080:8080"
+    environment:
+      - SQLITE_PATH=/data/ai.db
+      - JWT_SECRET=secret
+      - LLM_ADDRESS=llm:8081
+    volumes:
+      - ai_data:/data
+    networks:
+      ai:
+
+volumes:
+  ai_data:
+
+networks:
+  ai:
