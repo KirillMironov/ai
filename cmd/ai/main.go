@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -66,6 +67,10 @@ func run() error {
 	}
 
 	// db
+	if err := os.MkdirAll(filepath.Dir(cfg.SQLite.Path), os.ModePerm); err != nil {
+		return err
+	}
+
 	dataSourceURI := fmt.Sprintf(`file:%s?_pragma=foreign_keys(1)&_time_format=sqlite`, cfg.SQLite.Path)
 
 	db, err := sql.Open("sqlite", dataSourceURI)
