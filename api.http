@@ -67,3 +67,40 @@ GRPC {{ai_host}}/ai.Authenticator/SignIn
   "username": "username",
   "password": "password"
 }
+
+### AI list conversations
+GRPC {{ai_host}}/ai.Conversations/ListConversations
+jwt: {{jwt}}
+
+{
+  "offset": 0,
+  "limit": 100
+}
+
+### AI get conversation
+GRPC {{ai_host}}/ai.Conversations/GetConversation
+jwt: {{jwt}}
+
+{
+  "id": "1"
+}
+
+### AI send message
+GRPC {{ai_host}}/ai.Conversations/SendMessage
+jwt: {{jwt}}
+
+{
+  "conversation_id": "",
+  "role": "user",
+  "content": "What is the most populated city in Colombia?"
+}
+
+### AI send message stream
+GRPC {{ai_host}}/ai.Conversations/SendMessageStream
+jwt: {{jwt}}
+
+{
+  "conversation_id": "",
+  "role": "user",
+  "content": "What is the most populated city in Colombia?"
+}
