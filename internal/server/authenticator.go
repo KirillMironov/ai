@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/KirillMironov/ai/internal/api/ai"
+	api "github.com/KirillMironov/ai/internal/api/ai"
 )
 
 type authenticatorService interface {
@@ -25,7 +25,7 @@ func NewAuthenticator(service authenticatorService) Authenticator {
 }
 
 func (a Authenticator) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.SignUpResponse, error) {
-	token, err := a.service.SignUp(ctx, request.Username, request.Password)
+	token, err := a.service.SignUp(ctx, request.GetUsername(), request.GetPassword())
 	if err != nil {
 		slog.Error("failed to call service.SignUp", err)
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -35,7 +35,7 @@ func (a Authenticator) SignUp(ctx context.Context, request *api.SignUpRequest) (
 }
 
 func (a Authenticator) SignIn(ctx context.Context, request *api.SignInRequest) (*api.SignInResponse, error) {
-	token, err := a.service.SignIn(ctx, request.Username, request.Password)
+	token, err := a.service.SignIn(ctx, request.GetUsername(), request.GetPassword())
 	if err != nil {
 		slog.Error("failed to call service.SignIn", err)
 		return nil, status.Error(codes.Unauthenticated, err.Error())

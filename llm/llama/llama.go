@@ -21,6 +21,7 @@ const (
 	defaultServerPort  = 8080
 	defaultContextSize = 2048
 	defaultNumSlots    = 1
+	defaultNumThreads  = 4
 )
 
 var _ llm.LLM = &Llama{}
@@ -47,7 +48,7 @@ func New(executablePath, modelPath string, options ...Option) *Llama {
 		serverPort:     defaultServerPort,
 		contextSize:    defaultContextSize,
 		numSlots:       defaultNumSlots,
-		numThreads:     max(runtime.NumCPU(), 4),
+		numThreads:     max(runtime.NumCPU(), defaultNumThreads),
 	}
 	for _, option := range options {
 		option(llama)

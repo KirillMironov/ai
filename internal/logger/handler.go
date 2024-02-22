@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const bufSize = 1024
+
 type Options struct {
 	Level      slog.Leveler
 	TimeFormat string
@@ -41,7 +43,7 @@ func (h *Handler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (h *Handler) Handle(_ context.Context, record slog.Record) error {
-	buf := make([]byte, 0, 1024)
+	buf := make([]byte, 0, bufSize)
 
 	// time
 	if !record.Time.IsZero() {

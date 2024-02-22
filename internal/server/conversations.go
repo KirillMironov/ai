@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/KirillMironov/ai/internal/api/ai"
+	api "github.com/KirillMironov/ai/internal/api/ai"
 	"github.com/KirillMironov/ai/internal/model"
 )
 
@@ -35,7 +35,7 @@ func (c Conversations) ListConversations(ctx context.Context, request *api.ListC
 		return nil, err
 	}
 
-	conversations, err := c.service.ListConversations(ctx, token, int(request.Offset), int(request.Limit))
+	conversations, err := c.service.ListConversations(ctx, token, int(request.GetOffset()), int(request.GetLimit()))
 	if err != nil {
 		slog.Error("failed to list conversations", err)
 		return nil, err
@@ -50,7 +50,7 @@ func (c Conversations) GetConversation(ctx context.Context, request *api.GetConv
 		return nil, err
 	}
 
-	conversation, messages, err := c.service.GetConversation(ctx, token, request.Id)
+	conversation, messages, err := c.service.GetConversation(ctx, token, request.GetId())
 	if err != nil {
 		slog.Error("failed to get conversation", err)
 		return nil, err
@@ -70,15 +70,15 @@ func (c Conversations) SendMessage(ctx context.Context, request *api.SendMessage
 		return nil, err
 	}
 
-	role, err := roleFromAPI(request.Role)
+	role, err := roleFromAPI(request.GetRole())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	req := model.SendMessageRequest{
-		ConversationID: request.ConversationId,
+		ConversationID: request.GetConversationId(),
 		Role:           role,
-		Content:        request.Content,
+		Content:        request.GetContent(),
 	}
 
 	message, err := c.service.SendMessage(ctx, token, req)
@@ -96,15 +96,15 @@ func (c Conversations) SendMessageStream(request *api.SendMessageStreamRequest, 
 		return err
 	}
 
-	role, err := roleFromAPI(request.Role)
+	role, err := roleFromAPI(request.GetRole())
 	if err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	req := model.SendMessageRequest{
-		ConversationID: request.ConversationId,
+		ConversationID: request.GetConversationId(),
 		Role:           role,
-		Content:        request.Content,
+		Content:        request.GetContent(),
 	}
 
 	onChunk := func(message model.Message) error {

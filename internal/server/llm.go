@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/KirillMironov/ai/internal/api/llm"
+	api "github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/llm"
 )
 
@@ -27,11 +27,12 @@ func NewLLM(llm llm.LLM) LLM {
 }
 
 func (l LLM) Completion(ctx context.Context, request *api.CompletionRequest) (*api.CompletionResponse, error) {
-	if request.Prompt == "" {
+	prompt := request.GetPrompt()
+	if prompt == "" {
 		return nil, errEmptyPrompt
 	}
 
-	req := llm.CompletionRequest{Prompt: request.Prompt}
+	req := llm.CompletionRequest{Prompt: prompt}
 
 	resp, err := l.llm.Completion(ctx, req)
 	if err != nil {
@@ -43,11 +44,12 @@ func (l LLM) Completion(ctx context.Context, request *api.CompletionRequest) (*a
 }
 
 func (l LLM) CompletionStream(request *api.CompletionStreamRequest, stream api.LLM_CompletionStreamServer) error {
-	if request.Prompt == "" {
+	prompt := request.GetPrompt()
+	if prompt == "" {
 		return errEmptyPrompt
 	}
 
-	req := llm.CompletionRequest{Prompt: request.Prompt}
+	req := llm.CompletionRequest{Prompt: prompt}
 
 	onChunk := func(response llm.CompletionResponse) error {
 		return stream.Send(&api.CompletionStreamResponse{Content: response.Content})
@@ -62,11 +64,12 @@ func (l LLM) CompletionStream(request *api.CompletionStreamRequest, stream api.L
 }
 
 func (l LLM) ChatCompletion(ctx context.Context, request *api.ChatCompletionRequest) (*api.ChatCompletionResponse, error) {
-	if len(request.Messages) == 0 {
+	apiMessages := request.GetMessages()
+	if len(apiMessages) == 0 {
 		return nil, errNoMessages
 	}
 
-	messages, err := messagesFromAPI(request.Messages)
+	messages, err := messagesFromAPI(apiMessages)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -81,11 +84,12 @@ func (l LLM) ChatCompletion(ctx context.Context, request *api.ChatCompletionRequ
 }
 
 func (l LLM) ChatCompletionStream(request *api.ChatCompletionStreamRequest, stream api.LLM_ChatCompletionStreamServer) error {
-	if len(request.Messages) == 0 {
+	apiMessages := request.GetMessages()
+	if len(apiMessages) == 0 {
 		return errNoMessages
 	}
 
-	messages, err := messagesFromAPI(request.Messages)
+	messages, err := messagesFromAPI(apiMessages)
 	if err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -108,17 +112,17 @@ func messagesFromAPI(apiMessages []*api.Message) ([]llm.Message, error) {
 	messages := make([]llm.Message, 0, len(apiMessages))
 	for _, message := range apiMessages {
 		var role llm.Role
-		switch message.Role {
+		switch apiRole := message.GetRole(); apiRole {
 		case api.Role_ROLE_LLM:
 			role = llm.RoleLLM
 		case api.Role_ROLE_USER:
 			role = llm.RoleUser
 		default:
-			return nil, fmt.Errorf("unexpected message role: '%v'", message.Role)
+			return nil, fmt.Errorf("unexpected message role: '%v'", apiRole)
 		}
 		messages = append(messages, llm.Message{
 			Role:    role,
-			Content: message.Content,
+			Content: message.GetContent(),
 		})
 	}
 	return messages, nil

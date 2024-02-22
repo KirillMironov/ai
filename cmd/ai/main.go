@@ -17,8 +17,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	_ "modernc.org/sqlite"
 
-	"github.com/KirillMironov/ai/internal/api/ai"
-	llm "github.com/KirillMironov/ai/internal/api/llm"
+	api "github.com/KirillMironov/ai/internal/api/ai"
+	llmapi "github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/internal/logger"
 	"github.com/KirillMironov/ai/internal/model"
 	"github.com/KirillMironov/ai/internal/server"
@@ -109,7 +109,7 @@ func run() error {
 		return err
 	}
 
-	llmClient := llm.NewLLMClient(conn)
+	llmClient := llmapi.NewLLMClient(conn)
 
 	// services
 	tokenManager := token.NewManager[model.TokenPayload]([]byte(cfg.JWT.Secret), cfg.JWT.TokenTTL)

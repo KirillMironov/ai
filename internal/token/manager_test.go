@@ -15,8 +15,8 @@ const (
 )
 
 type Payload struct {
-	ID       int
-	Username string
+	ID       int    `json:"id"`
+	Username string `json:"username"`
 }
 
 func TestManager(t *testing.T) {
@@ -112,7 +112,7 @@ func TestManager_ParseToken(t *testing.T) {
 		},
 		{
 			name:        "invalid token signature",
-			token:       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+			token:       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", //nolint:lll
 			secret:      tokenSecret,
 			wantPayload: Payload{},
 			wantErr:     true,

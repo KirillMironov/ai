@@ -11,7 +11,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 
-	"github.com/KirillMironov/ai/internal/api/llm"
+	api "github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/internal/logger"
 	"github.com/KirillMironov/ai/internal/server"
 	"github.com/KirillMironov/ai/llm/llama"

@@ -9,9 +9,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/KirillMironov/ai/internal/api/llm"
+	api "github.com/KirillMironov/ai/internal/api/llm"
 	"github.com/KirillMironov/ai/internal/model"
 )
+
+const titleLength = 10
 
 type (
 	authenticatorService interface {
@@ -102,9 +104,9 @@ func (c Conversations) SendMessage(ctx context.Context, token string, request mo
 
 	var conversation model.Conversation
 
-	if request.ConversationID == "" {
+	if request.ConversationID == "" { //nolint:nestif
 		contentRunes := []rune(request.Content)
-		title := string(contentRunes[:min(10, len(contentRunes))])
+		title := string(contentRunes[:min(titleLength, len(contentRunes))])
 		now := time.Now()
 
 		conversation = model.Conversation{
@@ -147,7 +149,7 @@ func (c Conversations) SendMessage(ctx context.Context, token string, request mo
 		return model.Message{}, fmt.Errorf("send message to LLM: %w", err)
 	}
 
-	message := messageFromAPI(response.Message)
+	message := messageFromAPI(response.GetMessage())
 
 	message.ID = uuid.NewString()
 	if err = c.messagesStorage.SaveMessage(ctx, conversation.ID, message); err != nil {
@@ -174,9 +176,9 @@ func (c Conversations) SendMessageStream(ctx context.Context, token string, requ
 
 	var conversation model.Conversation
 
-	if request.ConversationID == "" {
+	if request.ConversationID == "" { //nolint:nestif
 		contentRunes := []rune(request.Content)
-		title := string(contentRunes[:min(10, len(contentRunes))])
+		title := string(contentRunes[:min(titleLength, len(contentRunes))])
 		now := time.Now()
 
 		conversation = model.Conversation{
@@ -223,15 +225,15 @@ func (c Conversations) SendMessageStream(ctx context.Context, token string, requ
 
 	for {
 		response, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
-		msg := messageFromAPI(response.Message)
+		msg := messageFromAPI(response.GetMessage())
 		if message.Role == 0 {
 			message.Role = msg.Role
 		}
 		message.Content += msg.Content
-		if err = onChunk(messageFromAPI(response.Message)); err != nil {
+		if err = onChunk(msg); err != nil {
 			return err
 		}
 	}
@@ -284,8 +286,8 @@ func roleToAPI(role model.Role) api.Role {
 
 func messageFromAPI(apiMessage *api.Message) model.Message {
 	return model.Message{
-		Role:    roleFromAPI(apiMessage.Role),
-		Content: apiMessage.Content,
+		Role:    roleFromAPI(apiMessage.GetRole()),
+		Content: apiMessage.GetContent(),
 	}
 }
 
