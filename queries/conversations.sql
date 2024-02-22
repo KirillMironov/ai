@@ -1,5 +1,11 @@
 -- name: SaveConversation :exec
-INSERT INTO conversations (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?);
+INSERT INTO conversations (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)
+ON CONFLICT DO UPDATE SET
+    id         = EXCLUDED.id,
+    user_id    = EXCLUDED.user_id,
+    title      = EXCLUDED.title,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at;
 
 -- name: GetConversationsByUserID :many
 SELECT id, user_id, title, created_at, updated_at
