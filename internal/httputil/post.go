@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func Post[T, U any](ctx context.Context, url string, statusCode int, payload T) (resp U, err error) {
+func Post[T any](ctx context.Context, url string, statusCode int, payload any) (resp T, err error) {
 	body, err := post(ctx, url, statusCode, payload)
 	if err != nil {
 		return resp, err
@@ -19,14 +19,16 @@ func Post[T, U any](ctx context.Context, url string, statusCode int, payload T) 
 	return resp, json.NewDecoder(body).Decode(&resp)
 }
 
-func PostBody[T any](ctx context.Context, url string, statusCode int, payload T) (body io.ReadCloser, err error) {
+func PostBody(ctx context.Context, url string, statusCode int, payload any) (body io.ReadCloser, err error) {
 	return post(ctx, url, statusCode, payload)
 }
 
-func post[T any](ctx context.Context, url string, statusCode int, payload T) (body io.ReadCloser, err error) {
+func post(ctx context.Context, url string, statusCode int, payload any) (body io.ReadCloser, err error) {
 	buf := new(bytes.Buffer)
-	if err = json.NewEncoder(buf).Encode(payload); err != nil {
-		return nil, err
+	if payload != nil {
+		if err = json.NewEncoder(buf).Encode(payload); err != nil {
+			return nil, err
+		}
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, buf)

@@ -59,7 +59,7 @@ func New(executablePath, modelPath string, options ...Option) *Llama {
 func (l *Llama) Completion(ctx context.Context, request llm.CompletionRequest) (llm.CompletionResponse, error) {
 	req := completionRequest{Prompt: request.Prompt}
 
-	resp, err := httputil.Post[completionRequest, completionResponse](ctx, l.serverURL("/completion"), http.StatusOK, req)
+	resp, err := httputil.Post[completionResponse](ctx, l.serverURL("/completion"), http.StatusOK, req)
 	if err != nil {
 		return llm.CompletionResponse{}, err
 	}
@@ -101,7 +101,7 @@ func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequ
 func (l *Llama) ChatCompletion(ctx context.Context, request llm.ChatCompletionRequest) (llm.ChatCompletionResponse, error) {
 	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages)}
 
-	resp, err := httputil.Post[chatCompletionRequest, chatCompletionResponse](ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
+	resp, err := httputil.Post[chatCompletionResponse](ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
 	if err != nil {
 		return llm.ChatCompletionResponse{}, err
 	}
