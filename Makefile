@@ -21,3 +21,4 @@ tools:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.1
 	go install go.uber.org/nilaway/cmd/nilaway@latest
+	go install github.com/matryer/moq@latest
