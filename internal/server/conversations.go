@@ -15,9 +15,9 @@ import (
 
 type conversationsService interface {
 	ListConversations(ctx context.Context, token string, offset, limit int) ([]model.Conversation, error)
-	GetConversation(ctx context.Context, token string, id string) (model.Conversation, []model.Message, error)
-	SendMessage(ctx context.Context, token string, request model.SendMessageRequest) (model.Message, error)
-	SendMessageStream(ctx context.Context, token string, request model.SendMessageRequest, onChunk func(model.Message) error) error
+	GetConversation(ctx context.Context, token string, id string) (model.Conversation, error)
+	SendMessage(ctx context.Context, request model.SendMessageRequest) (model.Message, error)
+	SendMessageStream(ctx context.Context, request model.SendMessageRequest, onChunk func(model.Message) error) error
 }
 
 type Conversations struct {
@@ -50,7 +50,7 @@ func (c Conversations) GetConversation(ctx context.Context, request *api.GetConv
 		return nil, err
 	}
 
-	conversation, messages, err := c.service.GetConversation(ctx, token, request.GetId())
+	conversation, err := c.service.GetConversation(ctx, token, request.GetId())
 	if err != nil {
 		slog.Error("failed to get conversation", err)
 		return nil, err
@@ -58,7 +58,7 @@ func (c Conversations) GetConversation(ctx context.Context, request *api.GetConv
 
 	response := &api.GetConversationResponse{
 		Conversation: conversationToAPI(conversation),
-		Messages:     messagesToAPI(messages),
+		Messages:     messagesToAPI(conversation.Messages),
 	}
 
 	return response, nil
@@ -76,12 +76,13 @@ func (c Conversations) SendMessage(ctx context.Context, request *api.SendMessage
 	}
 
 	req := model.SendMessageRequest{
+		Token:          token,
 		ConversationID: request.GetConversationId(),
 		Role:           role,
 		Content:        request.GetContent(),
 	}
 
-	message, err := c.service.SendMessage(ctx, token, req)
+	message, err := c.service.SendMessage(ctx, req)
 	if err != nil {
 		slog.Error("failed to send message", err)
 		return nil, err
@@ -102,6 +103,7 @@ func (c Conversations) SendMessageStream(request *api.SendMessageStreamRequest, 
 	}
 
 	req := model.SendMessageRequest{
+		Token:          token,
 		ConversationID: request.GetConversationId(),
 		Role:           role,
 		Content:        request.GetContent(),
@@ -111,7 +113,7 @@ func (c Conversations) SendMessageStream(request *api.SendMessageStreamRequest, 
 		return stream.Send(&api.SendMessageStreamResponse{Message: conversationMessageToAPI(message)})
 	}
 
-	if err = c.service.SendMessageStream(stream.Context(), token, req, onChunk); err != nil {
+	if err = c.service.SendMessageStream(stream.Context(), req, onChunk); err != nil {
 		slog.Error("failed to send message stream", err)
 		return err
 	}

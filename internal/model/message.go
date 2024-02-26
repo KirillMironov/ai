@@ -5,9 +5,3 @@ type Message struct {
 	Role    Role
 	Content string
 }
-
-type SendMessageRequest struct {
-	ConversationID string
-	Role           Role
-	Content        string
-}

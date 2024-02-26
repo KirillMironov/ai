@@ -96,7 +96,6 @@ func run() error {
 	// storage
 	usersStorage := storage.NewUsers(db)
 	conversationsStorage := storage.NewConversations(db)
-	messagesStorage := storage.NewMessages(db)
 
 	// llm client
 	var opts []grpc.DialOption
@@ -114,7 +113,7 @@ func run() error {
 	// services
 	tokenManager := token.NewManager[model.TokenPayload]([]byte(cfg.JWT.Secret), cfg.JWT.TokenTTL)
 	authenticator := service.NewAuthenticator(usersStorage, tokenManager)
-	conversations := service.NewConversations(authenticator, conversationsStorage, messagesStorage, llmClient)
+	conversations := service.NewConversations(authenticator, conversationsStorage, llmClient)
 
 	// grpc server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))

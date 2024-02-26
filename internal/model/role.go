@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 type Role uint8
 
 const (
@@ -14,6 +16,6 @@ func (r Role) String() string {
 	case RoleUser:
 		return "user"
 	default:
-		return ""
+		return fmt.Sprintf("unexpected role (%d)", r)
 	}
 }

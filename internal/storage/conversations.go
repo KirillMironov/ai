@@ -18,13 +18,36 @@ func NewConversations(db *sql.DB) Conversations {
 }
 
 func (c Conversations) SaveConversation(ctx context.Context, conversation model.Conversation) error {
-	return queries.New(c.db).SaveConversation(ctx, queries.SaveConversationParams{
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	qtx := queries.New(tx)
+
+	if err = qtx.SaveConversation(ctx, queries.SaveConversationParams{
 		ID:        conversation.ID,
 		UserID:    conversation.UserID,
 		Title:     conversation.Title,
 		CreatedAt: conversation.CreatedAt,
 		UpdatedAt: conversation.UpdatedAt,
-	})
+	}); err != nil {
+		return err
+	}
+
+	for _, message := range conversation.Messages {
+		if err = qtx.SaveMessage(ctx, queries.SaveMessageParams{
+			ID:             message.ID,
+			ConversationID: conversation.ID,
+			Role:           int64(message.Role),
+			Content:        message.Content,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (c Conversations) GetConversationsByUserID(ctx context.Context, userID string, offset, limit int) ([]model.Conversation, error) {
@@ -56,12 +79,20 @@ func (c Conversations) GetConversationsByUserID(ctx context.Context, userID stri
 }
 
 func (c Conversations) GetConversationByID(ctx context.Context, id string) (conversation model.Conversation, exists bool, err error) {
-	dataConversation, err := queries.New(c.db).GetConversationByID(ctx, id)
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		return model.Conversation{}, false, err
+	}
+	defer tx.Rollback()
+
+	qtx := queries.New(tx)
+
+	dataConversation, err := qtx.GetConversationByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			err = nil
 		}
-		return conversation, false, err
+		return model.Conversation{}, false, err
 	}
 
 	conversation = model.Conversation{
@@ -70,6 +101,19 @@ func (c Conversations) GetConversationByID(ctx context.Context, id string) (conv
 		Title:     dataConversation.Title,
 		CreatedAt: dataConversation.CreatedAt,
 		UpdatedAt: dataConversation.UpdatedAt,
+	}
+
+	dataMessages, err := qtx.GetMessagesByConversationID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return model.Conversation{}, false, err
+	}
+
+	for _, message := range dataMessages {
+		conversation.Messages = append(conversation.Messages, model.Message{
+			ID:      message.ID,
+			Role:    model.Role(message.Role),
+			Content: message.Content,
+		})
 	}
 
 	return conversation, true, nil

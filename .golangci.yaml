@@ -1,4 +1,7 @@
 linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*database/sql.Tx).Rollback
   exhaustive:
     ignore-enum-members: ".+_UNSPECIFIED$"
   gosec:

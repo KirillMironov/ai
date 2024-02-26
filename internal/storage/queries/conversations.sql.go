@@ -72,8 +72,7 @@ func (q *Queries) GetConversationsByUserID(ctx context.Context, arg GetConversat
 
 const saveConversation = `-- name: SaveConversation :exec
 INSERT INTO conversations (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)
-ON CONFLICT DO UPDATE SET
-    id         = EXCLUDED.id,
+ON CONFLICT (id) DO UPDATE SET
     user_id    = EXCLUDED.user_id,
     title      = EXCLUDED.title,
     created_at = EXCLUDED.created_at,

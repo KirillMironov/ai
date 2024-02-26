@@ -10,24 +10,25 @@ import (
 )
 
 const getMessagesByConversationID = `-- name: GetMessagesByConversationID :many
-SELECT id, conversation_id, role, content FROM messages WHERE conversation_id = ? ORDER BY id
+SELECT id, role, content FROM messages WHERE conversation_id = ? ORDER BY id
 `
 
-func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationID string) ([]Message, error) {
+type GetMessagesByConversationIDRow struct {
+	ID      string
+	Role    int64
+	Content string
+}
+
+func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationID string) ([]GetMessagesByConversationIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getMessagesByConversationID, conversationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Message
+	var items []GetMessagesByConversationIDRow
 	for rows.Next() {
-		var i Message
-		if err := rows.Scan(
-			&i.ID,
-			&i.ConversationID,
-			&i.Role,
-			&i.Content,
-		); err != nil {
+		var i GetMessagesByConversationIDRow
+		if err := rows.Scan(&i.ID, &i.Role, &i.Content); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -43,6 +44,10 @@ func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationI
 
 const saveMessage = `-- name: SaveMessage :exec
 INSERT INTO messages (id, conversation_id, role, content) VALUES (?, ?, ?, ?)
+ON CONFLICT (id) DO UPDATE SET
+    conversation_id = EXCLUDED.conversation_id,
+    role            = EXCLUDED.role,
+    content         = EXCLUDED.content
 `
 
 type SaveMessageParams struct {
