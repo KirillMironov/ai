@@ -21,6 +21,8 @@ type Message struct {
 	ConversationID string
 	Role           int64
 	Content        string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type User struct {

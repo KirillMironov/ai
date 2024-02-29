@@ -7,16 +7,19 @@ package queries
 
 import (
 	"context"
+	"time"
 )
 
 const getMessagesByConversationID = `-- name: GetMessagesByConversationID :many
-SELECT id, role, content FROM messages WHERE conversation_id = ? ORDER BY id
+SELECT id, role, content, created_at, updated_at FROM messages WHERE conversation_id = ? ORDER BY created_at
 `
 
 type GetMessagesByConversationIDRow struct {
-	ID      string
-	Role    int64
-	Content string
+	ID        string
+	Role      int64
+	Content   string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationID string) ([]GetMessagesByConversationIDRow, error) {
@@ -28,7 +31,13 @@ func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationI
 	var items []GetMessagesByConversationIDRow
 	for rows.Next() {
 		var i GetMessagesByConversationIDRow
-		if err := rows.Scan(&i.ID, &i.Role, &i.Content); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -43,11 +52,13 @@ func (q *Queries) GetMessagesByConversationID(ctx context.Context, conversationI
 }
 
 const saveMessage = `-- name: SaveMessage :exec
-INSERT INTO messages (id, conversation_id, role, content) VALUES (?, ?, ?, ?)
+INSERT INTO messages (id, conversation_id, role, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)
 ON CONFLICT (id) DO UPDATE SET
     conversation_id = EXCLUDED.conversation_id,
     role            = EXCLUDED.role,
-    content         = EXCLUDED.content
+    content         = EXCLUDED.content,
+    created_at      = EXCLUDED.created_at,
+    updated_at      = EXCLUDED.updated_at
 `
 
 type SaveMessageParams struct {
@@ -55,6 +66,8 @@ type SaveMessageParams struct {
 	ConversationID string
 	Role           int64
 	Content        string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error {
@@ -63,6 +76,8 @@ func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error 
 		arg.ConversationID,
 		arg.Role,
 		arg.Content,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	return err
 }

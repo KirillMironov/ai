@@ -42,6 +42,8 @@ func (c Conversations) SaveConversation(ctx context.Context, conversation model.
 			ConversationID: conversation.ID,
 			Role:           int64(message.Role),
 			Content:        message.Content,
+			CreatedAt:      message.CreatedAt,
+			UpdatedAt:      message.UpdatedAt,
 		}); err != nil {
 			return err
 		}
@@ -110,9 +112,11 @@ func (c Conversations) GetConversationByID(ctx context.Context, id string) (conv
 
 	for _, message := range dataMessages {
 		conversation.Messages = append(conversation.Messages, model.Message{
-			ID:      message.ID,
-			Role:    model.Role(message.Role),
-			Content: message.Content,
+			ID:        message.ID,
+			Role:      model.Role(message.Role),
+			Content:   message.Content,
+			CreatedAt: message.CreatedAt,
+			UpdatedAt: message.UpdatedAt,
 		})
 	}
 

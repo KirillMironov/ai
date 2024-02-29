@@ -93,10 +93,13 @@ func (c Conversations) SendMessage(ctx context.Context, request model.SendMessag
 		return model.Message{}, err
 	}
 
+	now := time.Now()
 	conversation.Messages = append(conversation.Messages, model.Message{
-		ID:      uuid.NewString(),
-		Role:    request.Role,
-		Content: request.Content,
+		ID:        uuid.NewString(),
+		Role:      request.Role,
+		Content:   request.Content,
+		CreatedAt: now,
+		UpdatedAt: now,
 	})
 
 	response, err := c.llmClient.ChatCompletion(ctx, &api.ChatCompletionRequest{Messages: messagesToAPI(conversation.Messages)})
@@ -104,8 +107,11 @@ func (c Conversations) SendMessage(ctx context.Context, request model.SendMessag
 		return model.Message{}, fmt.Errorf("send message to LLM: %w", err)
 	}
 
+	now = time.Now()
 	message := messageFromAPI(response.GetMessage())
 	message.ID = uuid.NewString()
+	message.CreatedAt = now
+	message.UpdatedAt = now
 	conversation.Messages = append(conversation.Messages, message)
 	conversation.UpdatedAt = time.Now()
 
@@ -131,10 +137,13 @@ func (c Conversations) SendMessageStream(ctx context.Context, request model.Send
 		return err
 	}
 
+	now := time.Now()
 	conversation.Messages = append(conversation.Messages, model.Message{
-		ID:      uuid.NewString(),
-		Role:    request.Role,
-		Content: request.Content,
+		ID:        uuid.NewString(),
+		Role:      request.Role,
+		Content:   request.Content,
+		CreatedAt: now,
+		UpdatedAt: now,
 	})
 
 	stream, err := c.llmClient.ChatCompletionStream(ctx, &api.ChatCompletionStreamRequest{Messages: messagesToAPI(conversation.Messages)})
@@ -158,6 +167,10 @@ func (c Conversations) SendMessageStream(ctx context.Context, request model.Send
 			return err
 		}
 	}
+	now = time.Now()
+	message.ID = uuid.NewString()
+	message.CreatedAt = now
+	message.UpdatedAt = now
 	conversation.Messages = append(conversation.Messages, message)
 	conversation.UpdatedAt = time.Now()
 

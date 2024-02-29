@@ -1,9 +1,11 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS messages (
-    id              TEXT    NOT NULL,
-    conversation_id TEXT    NOT NULL,
-    role            INTEGER NOT NULL,
-    content         TEXT    NOT NULL,
+    id              TEXT     NOT NULL,
+    conversation_id TEXT     NOT NULL,
+    role            INTEGER  NOT NULL,
+    content         TEXT     NOT NULL,
+    created_at      DATETIME NOT NULL,
+    updated_at      DATETIME NOT NULL,
     CONSTRAINT pk_messages_id PRIMARY KEY (id),
     CONSTRAINT fk_messages_conversation_id FOREIGN KEY (conversation_id) REFERENCES conversations (id)
 );
