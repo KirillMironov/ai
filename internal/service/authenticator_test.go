@@ -12,151 +12,165 @@ import (
 	"github.com/KirillMironov/ai/internal/model"
 )
 
-const (
-	testUserID   = "user_id"
-	testUsername = "username"
-	testPassword = "password"
-	testToken    = "token"
-)
-
 var (
 	errStorage      = errors.New("storage error")
 	errTokenManager = errors.New("token manager error")
 )
 
+type authenticatorMocks struct {
+	usersStorage usersStorage
+	tokenManager tokenManager
+}
+
 func TestAuthenticator_SignUp(t *testing.T) {
+	const (
+		testPassword = "password"
+		testToken    = "token"
+		testUsername = "username"
+	)
+
 	tests := []struct {
-		name         string
-		username     string
-		password     string
-		usersStorage usersStorage
-		tokenManager tokenManager
-		wantErr      bool
-		wantToken    string
+		name      string
+		username  string
+		password  string
+		wantErr   bool
+		wantToken string
+		mocks     authenticatorMocks
 	}{
 		{
-			name:     "success",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, nil
-				},
-				SaveUserFunc: func(context.Context, model.User) error {
-					return nil
-				},
-			},
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: func(model.TokenPayload) (string, error) {
-					return testToken, nil
-				},
-				ParseTokenFunc: nil,
-			},
+			name:      "success",
+			username:  testUsername,
+			password:  testPassword,
 			wantErr:   false,
 			wantToken: testToken,
-		},
-		{
-			name:         "empty username",
-			username:     "",
-			password:     testPassword,
-			usersStorage: nil,
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:         "empty password",
-			username:     testUsername,
-			password:     "",
-			usersStorage: nil,
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "user already exists",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, true, nil
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, nil
+					},
+					SaveUserFunc: func(context.Context, model.User) error {
+						return nil
+					},
 				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "get user by username error",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, errStorage
-				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "save user error",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, nil
-				},
-				SaveUserFunc: func(context.Context, model.User) error {
-					return errStorage
+				tokenManager: &mock.TokenManager{
+					GenerateTokenFunc: func(model.TokenPayload) (string, error) {
+						return testToken, nil
+					},
 				},
 			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
 		},
 		{
-			name:     "generate token error",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, nil
-				},
-				SaveUserFunc: func(context.Context, model.User) error {
-					return nil
-				},
-			},
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: func(model.TokenPayload) (string, error) {
-					return "", errTokenManager
-				},
-				ParseTokenFunc: nil,
-			},
+			name:      "empty username",
+			username:  "",
+			password:  testPassword,
 			wantErr:   true,
 			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: nil,
+			},
 		},
 		{
-			name:     "generate hash from password error",
-			username: testUsername,
-			password: string(make([]byte, 100)), // bcrypt: password too long (> 72 bytes)
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, nil
-				},
-				SaveUserFunc: nil,
+			name:      "empty password",
+			username:  testUsername,
+			password:  "",
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: nil,
 			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
+		},
+		{
+			name:      "user already exists",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, true, nil
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "get user by username error",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, errStorage
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "save user error",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, nil
+					},
+					SaveUserFunc: func(context.Context, model.User) error {
+						return errStorage
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "generate token error",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, nil
+					},
+					SaveUserFunc: func(context.Context, model.User) error {
+						return nil
+					},
+				},
+				tokenManager: &mock.TokenManager{
+					GenerateTokenFunc: func(model.TokenPayload) (string, error) {
+						return "", errTokenManager
+					},
+				},
+			},
+		},
+		{
+			name:      "generate hash from password error",
+			username:  testUsername,
+			password:  string(make([]byte, 100)), // bcrypt: password too long (> 72 bytes)
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, nil
+					},
+				},
+				tokenManager: nil,
+			},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			authenticator := NewAuthenticator(tc.usersStorage, tc.tokenManager)
+			authenticator := NewAuthenticator(tc.mocks.usersStorage, tc.mocks.tokenManager)
 
 			token, err := authenticator.SignUp(context.Background(), tc.username, tc.password)
 			if (err != nil) != tc.wantErr {
@@ -170,135 +184,149 @@ func TestAuthenticator_SignUp(t *testing.T) {
 }
 
 func TestAuthenticator_SignIn(t *testing.T) {
+	const (
+		testPassword = "password"
+		testToken    = "token"
+		testUserID   = "user_id"
+		testUsername = "username"
+	)
+
 	tests := []struct {
-		name         string
-		username     string
-		password     string
-		usersStorage usersStorage
-		tokenManager tokenManager
-		wantErr      bool
-		wantToken    string
+		name      string
+		username  string
+		password  string
+		wantErr   bool
+		wantToken string
+		mocks     authenticatorMocks
 	}{
 		{
-			name:     "success",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{
-						ID:             testUserID,
-						Username:       testUsername,
-						HashedPassword: hashFromPassword(t, testPassword),
-						CreatedAt:      time.Now(),
-					}, true, nil
-				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: func(model.TokenPayload) (string, error) {
-					return testToken, nil
-				},
-				ParseTokenFunc: nil,
-			},
+			name:      "success",
+			username:  testUsername,
+			password:  testPassword,
 			wantErr:   false,
 			wantToken: testToken,
-		},
-		{
-			name:         "empty username",
-			username:     "",
-			password:     testPassword,
-			usersStorage: nil,
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:         "empty password",
-			username:     testUsername,
-			password:     "",
-			usersStorage: nil,
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "invalid password",
-			username: testUsername,
-			password: "invalid-password",
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{
-						ID:             testUserID,
-						Username:       testUsername,
-						HashedPassword: hashFromPassword(t, testPassword),
-						CreatedAt:      time.Now(),
-					}, true, nil
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{
+							ID:             testUserID,
+							Username:       testUsername,
+							HashedPassword: hashFromPassword(t, testPassword),
+							CreatedAt:      time.Now(),
+						}, true, nil
+					},
 				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "user does not exist",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, nil
-				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "get user by username error",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{}, false, errStorage
-				},
-				SaveUserFunc: nil,
-			},
-			tokenManager: nil,
-			wantErr:      true,
-			wantToken:    "",
-		},
-		{
-			name:     "generate token error",
-			username: testUsername,
-			password: testPassword,
-			usersStorage: &mock.UsersStorage{
-				GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
-					return model.User{
-						ID:             testUserID,
-						Username:       testUsername,
-						HashedPassword: hashFromPassword(t, testPassword),
-						CreatedAt:      time.Now(),
-					}, true, nil
-				},
-				SaveUserFunc: func(context.Context, model.User) error {
-					return nil
+				tokenManager: &mock.TokenManager{
+					GenerateTokenFunc: func(model.TokenPayload) (string, error) {
+						return testToken, nil
+					},
 				},
 			},
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: func(model.TokenPayload) (string, error) {
-					return "", errTokenManager
-				},
-				ParseTokenFunc: nil,
-			},
+		},
+		{
+			name:      "empty username",
+			username:  "",
+			password:  testPassword,
 			wantErr:   true,
 			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "empty password",
+			username:  testUsername,
+			password:  "",
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "invalid password",
+			username:  testUsername,
+			password:  "invalid-password",
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{
+							ID:             testUserID,
+							Username:       testUsername,
+							HashedPassword: hashFromPassword(t, testPassword),
+							CreatedAt:      time.Now(),
+						}, true, nil
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "user does not exist",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, nil
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "get user by username error",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{}, false, errStorage
+					},
+				},
+				tokenManager: nil,
+			},
+		},
+		{
+			name:      "generate token error",
+			username:  testUsername,
+			password:  testPassword,
+			wantErr:   true,
+			wantToken: "",
+			mocks: authenticatorMocks{
+				usersStorage: &mock.UsersStorage{
+					GetUserByUsernameFunc: func(context.Context, string) (model.User, bool, error) {
+						return model.User{
+							ID:             testUserID,
+							Username:       testUsername,
+							HashedPassword: hashFromPassword(t, testPassword),
+							CreatedAt:      time.Now(),
+						}, true, nil
+					},
+					SaveUserFunc: func(context.Context, model.User) error {
+						return nil
+					},
+				},
+				tokenManager: &mock.TokenManager{
+					GenerateTokenFunc: func(model.TokenPayload) (string, error) {
+						return "", errTokenManager
+					},
+				},
+			},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			authenticator := NewAuthenticator(tc.usersStorage, tc.tokenManager)
+			authenticator := NewAuthenticator(tc.mocks.usersStorage, tc.mocks.tokenManager)
 
 			token, err := authenticator.SignIn(context.Background(), tc.username, tc.password)
 			if (err != nil) != tc.wantErr {
@@ -312,53 +340,62 @@ func TestAuthenticator_SignIn(t *testing.T) {
 }
 
 func TestAuthenticator_Authenticate(t *testing.T) {
+	const (
+		testToken    = "token"
+		testUserID   = "user_id"
+		testUsername = "username"
+	)
+
 	tests := []struct {
 		name             string
 		token            string
-		usersStorage     usersStorage
-		tokenManager     tokenManager
 		wantErr          bool
 		wantTokenPayload model.TokenPayload
+		mocks            authenticatorMocks
 	}{
 		{
-			name:         "success",
-			token:        testToken,
-			usersStorage: nil,
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: nil,
-				ParseTokenFunc: func(string) (model.TokenPayload, error) {
-					return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
-				},
-			},
+			name:             "success",
+			token:            testToken,
 			wantErr:          false,
 			wantTokenPayload: model.TokenPayload{UserID: testUserID, Username: testUsername},
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: &mock.TokenManager{
+					ParseTokenFunc: func(string) (model.TokenPayload, error) {
+						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
+					},
+				},
+			},
 		},
 		{
 			name:             "empty token",
 			token:            "",
-			usersStorage:     nil,
-			tokenManager:     nil,
 			wantErr:          true,
 			wantTokenPayload: model.TokenPayload{},
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: nil,
+			},
 		},
 		{
-			name:         "generate token error",
-			token:        "",
-			usersStorage: nil,
-			tokenManager: &mock.TokenManager{
-				GenerateTokenFunc: nil,
-				ParseTokenFunc: func(string) (model.TokenPayload, error) {
-					return model.TokenPayload{}, errors.New("token manager error")
-				},
-			},
+			name:             "generate token error",
+			token:            "",
 			wantErr:          true,
 			wantTokenPayload: model.TokenPayload{},
+			mocks: authenticatorMocks{
+				usersStorage: nil,
+				tokenManager: &mock.TokenManager{
+					ParseTokenFunc: func(string) (model.TokenPayload, error) {
+						return model.TokenPayload{}, errors.New("token manager error")
+					},
+				},
+			},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			authenticator := NewAuthenticator(tc.usersStorage, tc.tokenManager)
+			authenticator := NewAuthenticator(tc.mocks.usersStorage, tc.mocks.tokenManager)
 
 			tokenPayload, err := authenticator.Authenticate(tc.token)
 			if (err != nil) != tc.wantErr {

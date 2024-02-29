@@ -14,36 +14,38 @@ import (
 	"github.com/KirillMironov/ai/internal/model"
 )
 
-const (
-	testConversationID = "conversation_id"
-	testContent        = "content"
-)
-
 var (
 	errAuthenticator = errors.New("authenticator error")
 	errLLMClient     = errors.New("llm client error")
 )
 
+type conversationsMocks struct {
+	authenticatorService authenticatorService
+	conversationsStorage conversationsStorage
+	llmClient            api.LLMClient
+}
+
 func TestConversations_ListConversations(t *testing.T) {
-	type mocks struct {
-		authenticatorService authenticatorService
-		conversationsStorage conversationsStorage
-		llmClient            api.LLMClient
-	}
+	const (
+		testConversationID = "conversation_id"
+		testToken          = "token"
+		testUserID         = "user_id"
+		testUsername       = "username"
+	)
 
 	tests := []struct {
 		name              string
 		token             string
 		wantErr           bool
 		wantConversations []model.Conversation
-		mocks             mocks
+		mocks             conversationsMocks
 	}{
 		{
 			name:              "success",
 			token:             testToken,
 			wantErr:           false,
 			wantConversations: []model.Conversation{{ID: testConversationID, UserID: testUserID}},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -62,7 +64,7 @@ func TestConversations_ListConversations(t *testing.T) {
 			token:             testToken,
 			wantErr:           true,
 			wantConversations: nil,
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{}, errAuthenticator
@@ -77,7 +79,7 @@ func TestConversations_ListConversations(t *testing.T) {
 			token:             testToken,
 			wantErr:           true,
 			wantConversations: nil,
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -109,11 +111,12 @@ func TestConversations_ListConversations(t *testing.T) {
 }
 
 func TestConversations_GetConversation(t *testing.T) {
-	type mocks struct {
-		authenticatorService authenticatorService
-		conversationsStorage conversationsStorage
-		llmClient            api.LLMClient
-	}
+	const (
+		testConversationID = "conversation_id"
+		testToken          = "token"
+		testUserID         = "user_id"
+		testUsername       = "username"
+	)
 
 	tests := []struct {
 		name             string
@@ -121,7 +124,7 @@ func TestConversations_GetConversation(t *testing.T) {
 		conversationID   string
 		wantErr          bool
 		wantConversation model.Conversation
-		mocks            mocks
+		mocks            conversationsMocks
 	}{
 		{
 			name:             "success",
@@ -129,7 +132,7 @@ func TestConversations_GetConversation(t *testing.T) {
 			conversationID:   testConversationID,
 			wantErr:          false,
 			wantConversation: model.Conversation{ID: testConversationID, UserID: testUserID},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -149,7 +152,7 @@ func TestConversations_GetConversation(t *testing.T) {
 			conversationID:   testConversationID,
 			wantErr:          true,
 			wantConversation: model.Conversation{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -169,7 +172,7 @@ func TestConversations_GetConversation(t *testing.T) {
 			conversationID:   testConversationID,
 			wantErr:          true,
 			wantConversation: model.Conversation{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -189,7 +192,7 @@ func TestConversations_GetConversation(t *testing.T) {
 			conversationID:   testConversationID,
 			wantErr:          true,
 			wantConversation: model.Conversation{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{}, errAuthenticator
@@ -205,7 +208,7 @@ func TestConversations_GetConversation(t *testing.T) {
 			conversationID:   testConversationID,
 			wantErr:          true,
 			wantConversation: model.Conversation{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -237,18 +240,20 @@ func TestConversations_GetConversation(t *testing.T) {
 }
 
 func TestConversations_SendMessage(t *testing.T) {
-	type mocks struct {
-		authenticatorService authenticatorService
-		conversationsStorage conversationsStorage
-		llmClient            api.LLMClient
-	}
+	const (
+		testContent        = "content"
+		testConversationID = "conversation_id"
+		testToken          = "token"
+		testUserID         = "user_id"
+		testUsername       = "username"
+	)
 
 	tests := []struct {
 		name        string
 		request     model.SendMessageRequest
 		wantErr     bool
 		wantMessage model.Message
-		mocks       mocks
+		mocks       conversationsMocks
 	}{
 		{ //nolint:dupl
 			name: "role user",
@@ -260,7 +265,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     false,
 			wantMessage: model.Message{Role: model.RoleUser, Content: testContent},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -288,7 +293,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     false,
 			wantMessage: model.Message{Role: model.RoleAssistant, Content: testContent},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -311,7 +316,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			request:     model.SendMessageRequest{Content: ""},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: nil,
 				conversationsStorage: nil,
 				llmClient:            nil,
@@ -327,7 +332,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -351,7 +356,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{}, errAuthenticator
@@ -371,7 +376,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -395,7 +400,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -423,7 +428,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -451,7 +456,7 @@ func TestConversations_SendMessage(t *testing.T) {
 			},
 			wantErr:     true,
 			wantMessage: model.Message{},
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -490,18 +495,20 @@ func TestConversations_SendMessage(t *testing.T) {
 }
 
 func TestConversations_SendMessageStream(t *testing.T) {
-	type mocks struct {
-		authenticatorService authenticatorService
-		conversationsStorage conversationsStorage
-		llmClient            api.LLMClient
-	}
+	const (
+		testContent        = "content"
+		testConversationID = "conversation_id"
+		testToken          = "token"
+		testUserID         = "user_id"
+		testUsername       = "username"
+	)
 
 	tests := []struct {
 		name        string
 		request     model.SendMessageRequest
 		wantErr     bool
 		wantContent string
-		mocks       mocks
+		mocks       conversationsMocks
 	}{
 		{
 			name: "role user",
@@ -513,7 +520,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     false,
 			wantContent: testContent,
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -537,7 +544,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     false,
 			wantContent: testContent,
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -556,7 +563,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request:     model.SendMessageRequest{Content: ""},
 			wantErr:     true,
 			wantContent: "",
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: nil,
 				conversationsStorage: nil,
 				llmClient:            nil,
@@ -572,7 +579,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     true,
 			wantContent: "",
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -596,7 +603,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     true,
 			wantContent: "",
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{}, errAuthenticator
@@ -616,7 +623,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     true,
 			wantContent: "",
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -640,7 +647,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     true,
 			wantContent: "",
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
@@ -668,7 +675,7 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 			wantErr:     true,
 			wantContent: testContent,
-			mocks: mocks{
+			mocks: conversationsMocks{
 				authenticatorService: &mock.AuthenticatorService{
 					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
 						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
