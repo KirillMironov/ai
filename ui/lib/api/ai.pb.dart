@@ -11,8 +11,12 @@
 
 import 'dart:core' as $core;
 
-import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
+
+import 'ai.pbenum.dart';
+import 'google/protobuf/timestamp.pb.dart' as $1;
+
+export 'ai.pbenum.dart';
 
 class SignUpRequest extends $pb.GeneratedMessage {
   factory SignUpRequest({
@@ -463,15 +467,11 @@ class GetConversationResponse extends $pb.GeneratedMessage {
 class SendMessageRequest extends $pb.GeneratedMessage {
   factory SendMessageRequest({
     $core.String? conversationId,
-    $core.String? role,
     $core.String? content,
   }) {
     final $result = create();
     if (conversationId != null) {
       $result.conversationId = conversationId;
-    }
-    if (role != null) {
-      $result.role = role;
     }
     if (content != null) {
       $result.content = content;
@@ -484,7 +484,6 @@ class SendMessageRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendMessageRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'conversationId')
-    ..aOS(2, _omitFieldNames ? '' : 'role')
     ..aOS(3, _omitFieldNames ? '' : 'content')
     ..hasRequiredFields = false
   ;
@@ -519,21 +518,12 @@ class SendMessageRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearConversationId() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.String get role => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set role($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasRole() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRole() => clearField(2);
-
   @$pb.TagNumber(3)
-  $core.String get content => $_getSZ(2);
+  $core.String get content => $_getSZ(1);
   @$pb.TagNumber(3)
-  set content($core.String v) { $_setString(2, v); }
+  set content($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(3)
-  $core.bool hasContent() => $_has(2);
+  $core.bool hasContent() => $_has(1);
   @$pb.TagNumber(3)
   void clearContent() => clearField(3);
 }
@@ -593,15 +583,11 @@ class SendMessageResponse extends $pb.GeneratedMessage {
 class SendMessageStreamRequest extends $pb.GeneratedMessage {
   factory SendMessageStreamRequest({
     $core.String? conversationId,
-    $core.String? role,
     $core.String? content,
   }) {
     final $result = create();
     if (conversationId != null) {
       $result.conversationId = conversationId;
-    }
-    if (role != null) {
-      $result.role = role;
     }
     if (content != null) {
       $result.content = content;
@@ -614,7 +600,6 @@ class SendMessageStreamRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SendMessageStreamRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'conversationId')
-    ..aOS(2, _omitFieldNames ? '' : 'role')
     ..aOS(3, _omitFieldNames ? '' : 'content')
     ..hasRequiredFields = false
   ;
@@ -649,21 +634,12 @@ class SendMessageStreamRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearConversationId() => clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.String get role => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set role($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasRole() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRole() => clearField(2);
-
   @$pb.TagNumber(3)
-  $core.String get content => $_getSZ(2);
+  $core.String get content => $_getSZ(1);
   @$pb.TagNumber(3)
-  set content($core.String v) { $_setString(2, v); }
+  set content($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(3)
-  $core.bool hasContent() => $_has(2);
+  $core.bool hasContent() => $_has(1);
   @$pb.TagNumber(3)
   void clearContent() => clearField(3);
 }
@@ -724,8 +700,8 @@ class Conversation extends $pb.GeneratedMessage {
   factory Conversation({
     $core.String? id,
     $core.String? title,
-    $fixnum.Int64? createdAt,
-    $fixnum.Int64? updatedAt,
+    $1.Timestamp? createdAt,
+    $1.Timestamp? updatedAt,
   }) {
     final $result = create();
     if (id != null) {
@@ -749,8 +725,8 @@ class Conversation extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Conversation', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'title')
-    ..aInt64(3, _omitFieldNames ? '' : 'createdAt')
-    ..aInt64(4, _omitFieldNames ? '' : 'updatedAt')
+    ..aOM<$1.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
+    ..aOM<$1.Timestamp>(4, _omitFieldNames ? '' : 'updatedAt', subBuilder: $1.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -794,29 +770,35 @@ class Conversation extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get createdAt => $_getI64(2);
+  $1.Timestamp get createdAt => $_getN(2);
   @$pb.TagNumber(3)
-  set createdAt($fixnum.Int64 v) { $_setInt64(2, v); }
+  set createdAt($1.Timestamp v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasCreatedAt() => $_has(2);
   @$pb.TagNumber(3)
   void clearCreatedAt() => clearField(3);
+  @$pb.TagNumber(3)
+  $1.Timestamp ensureCreatedAt() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $fixnum.Int64 get updatedAt => $_getI64(3);
+  $1.Timestamp get updatedAt => $_getN(3);
   @$pb.TagNumber(4)
-  set updatedAt($fixnum.Int64 v) { $_setInt64(3, v); }
+  set updatedAt($1.Timestamp v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasUpdatedAt() => $_has(3);
   @$pb.TagNumber(4)
   void clearUpdatedAt() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Timestamp ensureUpdatedAt() => $_ensure(3);
 }
 
 class Message extends $pb.GeneratedMessage {
   factory Message({
     $core.String? id,
-    $core.String? role,
+    Role? role,
     $core.String? content,
+    $1.Timestamp? createdAt,
+    $1.Timestamp? updatedAt,
   }) {
     final $result = create();
     if (id != null) {
@@ -828,6 +810,12 @@ class Message extends $pb.GeneratedMessage {
     if (content != null) {
       $result.content = content;
     }
+    if (createdAt != null) {
+      $result.createdAt = createdAt;
+    }
+    if (updatedAt != null) {
+      $result.updatedAt = updatedAt;
+    }
     return $result;
   }
   Message._() : super();
@@ -836,8 +824,10 @@ class Message extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Message', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..aOS(2, _omitFieldNames ? '' : 'role')
+    ..e<Role>(2, _omitFieldNames ? '' : 'role', $pb.PbFieldType.OE, defaultOrMaker: Role.ROLE_UNSPECIFIED, valueOf: Role.valueOf, enumValues: Role.values)
     ..aOS(3, _omitFieldNames ? '' : 'content')
+    ..aOM<$1.Timestamp>(4, _omitFieldNames ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
+    ..aOM<$1.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $1.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -872,9 +862,9 @@ class Message extends $pb.GeneratedMessage {
   void clearId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get role => $_getSZ(1);
+  Role get role => $_getN(1);
   @$pb.TagNumber(2)
-  set role($core.String v) { $_setString(1, v); }
+  set role(Role v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasRole() => $_has(1);
   @$pb.TagNumber(2)
@@ -888,6 +878,28 @@ class Message extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(2);
   @$pb.TagNumber(3)
   void clearContent() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $1.Timestamp get createdAt => $_getN(3);
+  @$pb.TagNumber(4)
+  set createdAt($1.Timestamp v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCreatedAt() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCreatedAt() => clearField(4);
+  @$pb.TagNumber(4)
+  $1.Timestamp ensureCreatedAt() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $1.Timestamp get updatedAt => $_getN(4);
+  @$pb.TagNumber(5)
+  set updatedAt($1.Timestamp v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasUpdatedAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUpdatedAt() => clearField(5);
+  @$pb.TagNumber(5)
+  $1.Timestamp ensureUpdatedAt() => $_ensure(4);
 }
 
 

@@ -13,6 +13,21 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+@$core.Deprecated('Use roleDescriptor instead')
+const Role$json = {
+  '1': 'Role',
+  '2': [
+    {'1': 'ROLE_UNSPECIFIED', '2': 0},
+    {'1': 'ROLE_ASSISTANT', '2': 1},
+    {'1': 'ROLE_USER', '2': 2},
+  ],
+};
+
+/// Descriptor for `Role`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List roleDescriptor = $convert.base64Decode(
+    'CgRSb2xlEhQKEFJPTEVfVU5TUEVDSUZJRUQQABISCg5ST0xFX0FTU0lTVEFOVBABEg0KCVJPTE'
+    'VfVVNFUhAC');
+
 @$core.Deprecated('Use signUpRequestDescriptor instead')
 const SignUpRequest$json = {
   '1': 'SignUpRequest',
@@ -124,7 +139,6 @@ const SendMessageRequest$json = {
   '1': 'SendMessageRequest',
   '2': [
     {'1': 'conversation_id', '3': 1, '4': 1, '5': 9, '10': 'conversationId'},
-    {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
     {'1': 'content', '3': 3, '4': 1, '5': 9, '10': 'content'},
   ],
 };
@@ -132,7 +146,7 @@ const SendMessageRequest$json = {
 /// Descriptor for `SendMessageRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List sendMessageRequestDescriptor = $convert.base64Decode(
     'ChJTZW5kTWVzc2FnZVJlcXVlc3QSJwoPY29udmVyc2F0aW9uX2lkGAEgASgJUg5jb252ZXJzYX'
-    'Rpb25JZBISCgRyb2xlGAIgASgJUgRyb2xlEhgKB2NvbnRlbnQYAyABKAlSB2NvbnRlbnQ=');
+    'Rpb25JZBIYCgdjb250ZW50GAMgASgJUgdjb250ZW50');
 
 @$core.Deprecated('Use sendMessageResponseDescriptor instead')
 const SendMessageResponse$json = {
@@ -152,7 +166,6 @@ const SendMessageStreamRequest$json = {
   '1': 'SendMessageStreamRequest',
   '2': [
     {'1': 'conversation_id', '3': 1, '4': 1, '5': 9, '10': 'conversationId'},
-    {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
     {'1': 'content', '3': 3, '4': 1, '5': 9, '10': 'content'},
   ],
 };
@@ -160,8 +173,7 @@ const SendMessageStreamRequest$json = {
 /// Descriptor for `SendMessageStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List sendMessageStreamRequestDescriptor = $convert.base64Decode(
     'ChhTZW5kTWVzc2FnZVN0cmVhbVJlcXVlc3QSJwoPY29udmVyc2F0aW9uX2lkGAEgASgJUg5jb2'
-    '52ZXJzYXRpb25JZBISCgRyb2xlGAIgASgJUgRyb2xlEhgKB2NvbnRlbnQYAyABKAlSB2NvbnRl'
-    'bnQ=');
+    '52ZXJzYXRpb25JZBIYCgdjb250ZW50GAMgASgJUgdjb250ZW50');
 
 @$core.Deprecated('Use sendMessageStreamResponseDescriptor instead')
 const SendMessageStreamResponse$json = {
@@ -182,29 +194,34 @@ const Conversation$json = {
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
     {'1': 'title', '3': 2, '4': 1, '5': 9, '10': 'title'},
-    {'1': 'created_at', '3': 3, '4': 1, '5': 3, '10': 'createdAt'},
-    {'1': 'updated_at', '3': 4, '4': 1, '5': 3, '10': 'updatedAt'},
+    {'1': 'created_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
+    {'1': 'updated_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Conversation`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List conversationDescriptor = $convert.base64Decode(
-    'CgxDb252ZXJzYXRpb24SDgoCaWQYASABKAlSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRIdCg'
-    'pjcmVhdGVkX2F0GAMgASgDUgljcmVhdGVkQXQSHQoKdXBkYXRlZF9hdBgEIAEoA1IJdXBkYXRl'
-    'ZEF0');
+    'CgxDb252ZXJzYXRpb24SDgoCaWQYASABKAlSAmlkEhQKBXRpdGxlGAIgASgJUgV0aXRsZRI5Cg'
+    'pjcmVhdGVkX2F0GAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJY3JlYXRlZEF0'
+    'EjkKCnVwZGF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdG'
+    'VkQXQ=');
 
 @$core.Deprecated('Use messageDescriptor instead')
 const Message$json = {
   '1': 'Message',
   '2': [
     {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
+    {'1': 'role', '3': 2, '4': 1, '5': 14, '6': '.ai.Role', '10': 'role'},
     {'1': 'content', '3': 3, '4': 1, '5': 9, '10': 'content'},
+    {'1': 'created_at', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
+    {'1': 'updated_at', '3': 5, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Message`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List messageDescriptor = $convert.base64Decode(
-    'CgdNZXNzYWdlEg4KAmlkGAEgASgJUgJpZBISCgRyb2xlGAIgASgJUgRyb2xlEhgKB2NvbnRlbn'
-    'QYAyABKAlSB2NvbnRlbnQ=');
+    'CgdNZXNzYWdlEg4KAmlkGAEgASgJUgJpZBIcCgRyb2xlGAIgASgOMgguYWkuUm9sZVIEcm9sZR'
+    'IYCgdjb250ZW50GAMgASgJUgdjb250ZW50EjkKCmNyZWF0ZWRfYXQYBCABKAsyGi5nb29nbGUu'
+    'cHJvdG9idWYuVGltZXN0YW1wUgljcmVhdGVkQXQSOQoKdXBkYXRlZF9hdBgFIAEoCzIaLmdvb2'
+    'dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdA==');
 

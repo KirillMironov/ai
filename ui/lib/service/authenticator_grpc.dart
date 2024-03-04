@@ -14,10 +14,9 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
     final client = api.AuthenticatorClient(channel);
 
     try {
-      final response = await client.signUp(api.SignUpRequest(
-          username: username,
-          password: password,
-      ));
+      final response = await client.signUp(api.SignUpRequest()
+        ..username = username
+        ..password = password);
 
       return response.token;
     } catch (e) {
@@ -33,10 +32,9 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
     final client = api.AuthenticatorClient(channel);
 
     try {
-      final response = await client.signIn(api.SignInRequest(
-        username: username,
-        password: password,
-      ));
+      final response = await client.signIn(api.SignInRequest()
+        ..username = username
+        ..password = password);
 
       return response.token;
     } catch (e) {

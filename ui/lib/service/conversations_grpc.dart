@@ -19,7 +19,9 @@ class ConversationsServiceGRPC implements ConversationsService {
     final client = api.ConversationsClient(channel);
 
     try {
-      final response = await client.listConversations(api.ListConversationsRequest(offset: offset, limit: limit));
+      final response = await client.listConversations(api.ListConversationsRequest()
+      ..limit = limit
+      ..offset = offset);
 
       return response.conversations.map((e) => Conversation(
         e.id,
@@ -49,10 +51,10 @@ class ConversationsServiceGRPC implements ConversationsService {
           conversation.title,
           response.messages.map((e) => Message(
               e.id,
-              e.role == 'user' ? Role.user : Role.assistant,
+              e.role.toRole(),
               e.content,
-              DateTime.now(),
-              DateTime.now(),
+              e.createdAt.toDateTime(),
+              e.updatedAt.toDateTime(),
           )).toList(),
           conversation.createdAt.toDateTime(),
           conversation.updatedAt.toDateTime()
@@ -72,16 +74,15 @@ class ConversationsServiceGRPC implements ConversationsService {
     try {
       final response = await client.sendMessage(api.SendMessageRequest()
         ..conversationId = conversationId
-        ..role = role
         ..content = content);
       final message = response.message;
 
       return Message(
           message.id,
-          message.role == 'user' ? Role.user : Role.assistant,
+          message.role.toRole(),
           message.content,
-          DateTime.now(),
-          DateTime.now(),
+          message.createdAt.toDateTime(),
+          message.updatedAt.toDateTime(),
       );
     } catch (e) {
       throw Exception('failed to send message: $e');
@@ -98,15 +99,14 @@ class ConversationsServiceGRPC implements ConversationsService {
     try {
       final request = api.SendMessageStreamRequest()
         ..conversationId = conversationId
-        ..role = role
         ..content = content;
 
       return client.sendMessageStream(request).map((event) => Message(
           event.message.id,
-          event.message.role == 'user' ? Role.user : Role.assistant,
+          event.message.role.toRole(),
           event.message.content,
-          DateTime.now(),
-          DateTime.now()
+          event.message.createdAt.toDateTime(),
+          event.message.updatedAt.toDateTime(),
       ));
     } catch (e) {
       throw Exception('failed to send message stream: $e');
@@ -117,5 +117,18 @@ class ConversationsServiceGRPC implements ConversationsService {
 extension Int64ToDateTime on Int64 {
   DateTime toDateTime() {
     return DateTime.fromMillisecondsSinceEpoch(1000 * toInt());
+  }
+}
+
+extension APIRoleToRole on api.Role {
+  Role toRole() {
+    switch (this) {
+      case api.Role.ROLE_ASSISTANT:
+        return Role.assistant;
+      case api.Role.ROLE_USER:
+        return Role.user;
+      default:
+        throw Exception('unexpected role: $this');
+    }
   }
 }
