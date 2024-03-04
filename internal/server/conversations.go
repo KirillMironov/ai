@@ -2,12 +2,12 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	api "github.com/KirillMironov/ai/internal/api/ai"
 	"github.com/KirillMironov/ai/internal/model"
@@ -70,15 +70,10 @@ func (c Conversations) SendMessage(ctx context.Context, request *api.SendMessage
 		return nil, err
 	}
 
-	role, err := roleFromAPI(request.GetRole())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	req := model.SendMessageRequest{
 		Token:          token,
 		ConversationID: request.GetConversationId(),
-		Role:           role,
+		Role:           model.RoleUser,
 		Content:        request.GetContent(),
 	}
 
@@ -97,15 +92,10 @@ func (c Conversations) SendMessageStream(request *api.SendMessageStreamRequest, 
 		return err
 	}
 
-	role, err := roleFromAPI(request.GetRole())
-	if err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	req := model.SendMessageRequest{
 		Token:          token,
 		ConversationID: request.GetConversationId(),
-		Role:           role,
+		Role:           model.RoleUser,
 		Content:        request.GetContent(),
 	}
 
@@ -159,28 +149,28 @@ func conversationToAPI(conversation model.Conversation) *api.Conversation {
 	return &api.Conversation{
 		Id:        conversation.ID,
 		Title:     conversation.Title,
-		CreatedAt: conversation.CreatedAt.Unix(),
-		UpdatedAt: conversation.UpdatedAt.Unix(),
+		CreatedAt: timestamppb.New(conversation.CreatedAt),
+		UpdatedAt: timestamppb.New(conversation.UpdatedAt),
 	}
 }
 
 func conversationMessageToAPI(message model.Message) *api.Message {
 	return &api.Message{
-		Id:      message.ID,
-		Role:    message.Role.String(),
-		Content: message.Content,
+		Id:        message.ID,
+		Role:      roleToAPI(message.Role),
+		Content:   message.Content,
+		CreatedAt: timestamppb.New(message.CreatedAt),
+		UpdatedAt: timestamppb.New(message.UpdatedAt),
 	}
 }
 
-func roleFromAPI(apiRole string) (model.Role, error) {
-	var role model.Role
-	switch apiRole {
-	case "assistant":
-		role = model.RoleAssistant
-	case "user":
-		role = model.RoleUser
+func roleToAPI(role model.Role) api.Role {
+	switch role {
+	case model.RoleAssistant:
+		return api.Role_ROLE_ASSISTANT
+	case model.RoleUser:
+		return api.Role_ROLE_USER
 	default:
-		return role, fmt.Errorf("unexpected role: '%s'", apiRole)
+		return api.Role_ROLE_UNSPECIFIED
 	}
-	return role, nil
 }
