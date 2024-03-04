@@ -91,7 +91,6 @@ jwt: {{jwt}}
 
 {
   "conversation_id": "",
-  "role": "user",
   "content": "What is the most populated city in Colombia?"
 }
 
@@ -101,6 +100,5 @@ jwt: {{jwt}}
 
 {
   "conversation_id": "",
-  "role": "user",
   "content": "What is the most populated city in Colombia?"
 }
