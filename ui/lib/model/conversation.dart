@@ -1,9 +1,11 @@
+import 'package:ai/model/message.dart';
+
 class Conversation {
   final String id;
-  final String userId;
   final String title;
+  final List<Message> messages;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Conversation(this.id, this.userId, this.title, this.createdAt, this.updatedAt);
+  Conversation(this.id, this.title, this.messages, this.createdAt, this.updatedAt);
 }

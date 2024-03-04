@@ -16,8 +16,8 @@ class _ConversationsPageState extends State<ConversationsPage> {
   final buttonColor = const Color.fromRGBO(31, 31, 31, 1.0);
 
   List<Conversation> conversations = [
-    Conversation("85a004ba-9006-4b69-86fe-513ce477ead3", "user_id", "What is th", DateTime.timestamp(), DateTime.timestamp()),
-    Conversation("85a004ba-9006-4b69-86fe-513ce477ead4", "user_id", "What is th", DateTime.timestamp(), DateTime.timestamp()),
+    Conversation("85a004ba-9006-4b69-86fe-513ce477ead3", "What is th", List.empty(), DateTime.timestamp(), DateTime.timestamp()),
+    Conversation("85a004ba-9006-4b69-86fe-513ce477ead4", "What is th", List.empty(), DateTime.timestamp(), DateTime.timestamp()),
   ];
 
   List<Message> messages = [
