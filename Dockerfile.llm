@@ -6,7 +6,7 @@ RUN make
 
 FROM golang:1.22.0 as llm-builder
 WORKDIR /ai
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /bin/llm ./cmd/llm
