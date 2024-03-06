@@ -5,16 +5,22 @@ import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final AuthenticatorService authenticatorService;
   final TokenStorage tokenStorage;
 
-  LoginPage({
+  const LoginPage({
     super.key,
     required this.authenticatorService,
     required this.tokenStorage,
   });
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -31,22 +37,25 @@ class LoginPage extends StatelessWidget {
             alignment: Alignment.center,
             child: SizedBox(
               width: width,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _textField('Username', false, _usernameController),
-                  const SizedBox(height: 15.0),
-                  _textField('Password', true, _passwordController),
-                  const SizedBox(height: 15.0),
-                  Row(
-                    children: [
-                      _button(context, 'Sign In', _signIn),
-                      const SizedBox(width: 10.0),
-                      _button(context, 'Sign Up', _signUp),
-                    ],
-                  )
-                ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _textFormField('Username', false, _usernameController, 'Empty username'),
+                    const SizedBox(height: 15.0),
+                    _textFormField('Password', true, _passwordController, 'Empty password'),
+                    const SizedBox(height: 15.0),
+                    Row(
+                      children: [
+                        _button('Sign In', () => _login(widget.authenticatorService.signIn)),
+                        const SizedBox(width: 10.0),
+                        _button('Sign Up', () => _login(widget.authenticatorService.signUp)),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -55,8 +64,8 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _textField(String hint, bool obscureText, TextEditingController controller) {
-    return TextField(
+  Widget _textFormField(String hint, bool obscureText, TextEditingController controller, String validationError) {
+    return TextFormField(
       controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
@@ -65,14 +74,20 @@ class LoginPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.0),
         ),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return validationError;
+        }
+        return null;
+      },
     );
   }
 
-  Widget _button(BuildContext context, String text, void Function(BuildContext) onTap) {
+  Widget _button(String text, VoidCallback onTap) {
     return Expanded(
       child: RoundedButton(
         color: const Color.fromRGBO(31, 31, 31, 1.0),
-        onTap: () => onTap(context),
+        onTap: onTap,
         child: Center(
           child: Text(
             text,
@@ -83,41 +98,16 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  void _signIn(BuildContext context) async {
-    try {
-      final token = await authenticatorService.signIn(
-        _usernameController.text,
-        _passwordController.text
-      );
-      tokenStorage.saveToken(token);
-    } catch(e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showMaterialBanner(
-        MaterialBanner(
-            content: Text(e.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => ScaffoldMessenger.of(context).clearMaterialBanners(),
-                child: const Text('DISMISS'),
-              ),
-            ],
-        )
-      );
+  void _login(Future<String> Function(String username, String password) loginAction) async {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
-    if (!context.mounted) return;
-    context.pushNamed(Routes.conversations.name);
-  }
 
-  void _signUp(BuildContext context) async {
     try {
-      final token = await authenticatorService.signUp(
-          _usernameController.text,
-          _passwordController.text
-      );
-      tokenStorage.saveToken(token);
+      final token = await loginAction(_usernameController.text, _passwordController.text);
+      widget.tokenStorage.saveToken(token);
     } catch(e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
             content: Text(e.toString()),
@@ -129,6 +119,10 @@ class LoginPage extends StatelessWidget {
             ],
           )
       );
+      return;
     }
+
+    if (!mounted) return;
+    context.pushNamed(Routes.conversations.name);
   }
 }

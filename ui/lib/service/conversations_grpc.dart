@@ -66,7 +66,7 @@ class ConversationsServiceGRPC implements ConversationsService {
   }
 
   @override
-  Future<Message> sendMessage(String conversationId, String role, String content) async {
+  Future<Message> sendMessage(String conversationId, String content) async {
     final channel = ClientChannel(host, port: port);
     final client = api.ConversationsClient(channel);
 
@@ -91,7 +91,7 @@ class ConversationsServiceGRPC implements ConversationsService {
   }
 
   @override
-  Stream<Message> sendMessageStream(String conversationId, String role, String content) {
+  Stream<Message> sendMessageStream(String conversationId, String content) {
     final channel = ClientChannel(host, port: port);
     final client = api.ConversationsClient(channel);
 

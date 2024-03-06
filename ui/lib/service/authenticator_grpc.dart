@@ -9,7 +9,7 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
   AuthenticatorServiceGRPC(this.host, this.port);
 
   @override
-  Future<String> signUp(String username, password) async {
+  Future<String> signUp(String username, String password) async {
     final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
     final client = api.AuthenticatorClient(channel);
 
@@ -27,7 +27,7 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
   }
 
   @override
-  Future<String> signIn(String username, password) async {
+  Future<String> signIn(String username, String password) async {
     final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
     final client = api.AuthenticatorClient(channel);
 
