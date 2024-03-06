@@ -3,7 +3,6 @@ import 'package:ai/model/conversation.dart';
 import 'package:ai/model/message.dart';
 import 'package:ai/model/role.dart';
 import 'package:ai/service/conversations.dart';
-import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
 
@@ -111,12 +110,6 @@ class ConversationsServiceGRPC implements ConversationsService {
     } catch (e) {
       throw Exception('failed to send message stream: $e');
     }
-  }
-}
-
-extension Int64ToDateTime on Int64 {
-  DateTime toDateTime() {
-    return DateTime.fromMillisecondsSinceEpoch(1000 * toInt());
   }
 }
 

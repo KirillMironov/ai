@@ -1,16 +1,30 @@
 import 'package:ai/page/conversations.dart';
 import 'package:ai/page/login.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:ai/router.dart';
+import 'package:ai/service/authenticator_grpc.dart';
+import 'package:ai/storage/token_shared_preferences.dart';
+import 'package:flutter/material.dart' hide Router;
+// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
-  usePathUrlStrategy();
-  runApp(const App());
+  WidgetsFlutterBinding.ensureInitialized();
+  final tokenStorage = TokenStorageSharedPreferences();
+  final authenticatorService = AuthenticatorServiceGRPC('localhost', 8080);
+  final loginPage = LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage);
+  const conversationsPage = ConversationsPage();
+  final router = Router(tokenStorage, loginPage, conversationsPage);
+  // usePathUrlStrategy();
+  runApp(App(router: router.router()));
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final GoRouter router;
+
+  const App({
+    super.key,
+    required this.router,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,20 +32,7 @@ class App extends StatelessWidget {
       title: 'AI',
       theme: ThemeData.dark(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: router,
     );
   }
 }
-
-final GoRouter _router = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const ConversationsPage(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginPage(),
-    )
-  ]
-);

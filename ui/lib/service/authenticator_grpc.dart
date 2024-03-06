@@ -1,6 +1,6 @@
 import 'package:ai/service/authenticator.dart';
-import 'package:grpc/grpc.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
+import 'package:grpc/grpc.dart';
 
 class AuthenticatorServiceGRPC implements AuthenticatorService {
   final String host;
@@ -10,7 +10,7 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
 
   @override
   Future<String> signUp(String username, password) async {
-    final channel = ClientChannel(host, port: port);
+    final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
     final client = api.AuthenticatorClient(channel);
 
     try {
@@ -28,7 +28,7 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
 
   @override
   Future<String> signIn(String username, password) async {
-    final channel = ClientChannel(host, port: port);
+    final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
     final client = api.AuthenticatorClient(channel);
 
     try {
