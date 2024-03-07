@@ -123,6 +123,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (!mounted) return;
-    context.pushNamed(Routes.conversations.name);
+    context.goNamed(Routes.conversations.name);
   }
 }
