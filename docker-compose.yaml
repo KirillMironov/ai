@@ -30,6 +30,15 @@ services:
     networks:
       ai:
 
+  envoy:
+    container_name: envoy
+    build:
+      dockerfile: ./Dockerfile.envoy
+    ports:
+      - "9090:8080"
+    networks:
+      ai:
+
 volumes:
   ai_data:
 
