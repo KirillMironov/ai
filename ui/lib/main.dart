@@ -7,14 +7,24 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:go_router/go_router.dart';
 
 void main() {
+  // --dart-define args
+  const aiHost = String.fromEnvironment('AI_HOST', defaultValue: 'localhost');
+  const aiPort = int.fromEnvironment('AI_PORT', defaultValue: 8080);
+  const aiWebPort = int.fromEnvironment('AI_WEB_PORT', defaultValue: 9090);
+  const aiSecure = bool.fromEnvironment('AI_SECURE', defaultValue: false);
+
+  // routing
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   setUrlStrategy();
+
+  // di
   final tokenStorage = SharedPreferencesTokenStorage();
-  final authenticatorService = GrpcAuthenticatorService('localhost', 8080, 9090, false);
+  final authenticatorService = GrpcAuthenticatorService(aiHost, aiPort, aiWebPort, aiSecure);
   final loginPage = LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage);
   const conversationsPage = ConversationsPage();
   final router = Router(tokenStorage, loginPage, conversationsPage);
+
   runApp(App(router: router.router()));
 }
 
