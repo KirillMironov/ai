@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:ai/storage/token.dart';
+import 'package:ai/storage/token_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TokenStorageSharedPreferences implements TokenStorage {
+class SharedPreferencesTokenStorage implements TokenStorage {
   late SharedPreferences _prefs;
   final _jwtKey = 'jwt';
 
-  TokenStorageSharedPreferences() {
+  SharedPreferencesTokenStorage() {
     _initPrefs();
   }
 

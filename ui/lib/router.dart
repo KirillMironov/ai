@@ -1,6 +1,6 @@
-import 'package:ai/page/conversations.dart';
-import 'package:ai/page/login.dart';
-import 'package:ai/storage/token.dart';
+import 'package:ai/page/conversations_page.dart';
+import 'package:ai/page/login_page.dart';
+import 'package:ai/storage/token_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai/router.dart'
   if (dart.library.html) 'package:flutter_web_plugins/flutter_web_plugins.dart'

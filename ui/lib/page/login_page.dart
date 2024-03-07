@@ -1,6 +1,6 @@
 import 'package:ai/router.dart';
 import 'package:ai/service/authenticator_service.dart';
-import 'package:ai/storage/token.dart';
+import 'package:ai/storage/token_storage.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
