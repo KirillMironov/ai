@@ -1,5 +1,5 @@
 import 'package:ai/router.dart';
-import 'package:ai/service/authenticator.dart';
+import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/storage/token.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
-            content: Text(e.toString()),
+            content: SelectableText(e.toString()),
             actions: [
               TextButton(
                 onPressed: () => ScaffoldMessenger.of(context).clearMaterialBanners(),

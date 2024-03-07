@@ -1,5 +1,5 @@
-import '../model/conversation.dart';
-import '../model/message.dart';
+import 'package:ai/model/conversation.dart';
+import 'package:ai/model/message.dart';
 
 abstract interface class ConversationsService {
   Future<List<Conversation>> listConversations(int offset, int limit);

@@ -2,25 +2,23 @@ import 'dart:async';
 import 'package:ai/model/conversation.dart';
 import 'package:ai/model/message.dart';
 import 'package:ai/model/role.dart';
-import 'package:ai/service/conversations.dart';
-import 'package:grpc/grpc.dart';
+import 'package:ai/service/conversations_service.dart';
+import 'package:ai/service/grpc_service.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
 
-class ConversationsServiceGRPC implements ConversationsService {
-  final String host;
-  final int port;
-
-  ConversationsServiceGRPC(this.host, this.port);
+final class GrpcConversationsService extends GrpcService implements ConversationsService {
+  GrpcConversationsService(super.host, super.port, super.webPort, super.secure);
 
   @override
   Future<List<Conversation>> listConversations(int offset, int limit) async {
-    final channel = ClientChannel(host, port: port);
+    final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
     try {
       final response = await client.listConversations(api.ListConversationsRequest()
       ..limit = limit
-      ..offset = offset);
+      ..offset = offset
+      );
 
       return response.conversations.map((e) => Conversation(
         e.id,
@@ -30,7 +28,7 @@ class ConversationsServiceGRPC implements ConversationsService {
         e.updatedAt.toDateTime()
       )).toList();
     } catch (e) {
-      throw Exception('failed to list conversations: $e');
+      throw handleException(e, 'failed to list conversations');
     } finally {
       await channel.shutdown();
     }
@@ -38,7 +36,7 @@ class ConversationsServiceGRPC implements ConversationsService {
 
   @override
   Future<Conversation> getConversation(String id) async {
-    final channel = ClientChannel(host, port: port);
+    final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
     try {
@@ -59,7 +57,7 @@ class ConversationsServiceGRPC implements ConversationsService {
           conversation.updatedAt.toDateTime()
       );
     } catch (e) {
-      throw Exception('failed to get conversation: $e');
+      throw handleException(e, 'failed to get conversation');
     } finally {
       await channel.shutdown();
     }
@@ -67,13 +65,14 @@ class ConversationsServiceGRPC implements ConversationsService {
 
   @override
   Future<Message> sendMessage(String conversationId, String content) async {
-    final channel = ClientChannel(host, port: port);
+    final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
     try {
       final response = await client.sendMessage(api.SendMessageRequest()
         ..conversationId = conversationId
-        ..content = content);
+        ..content = content
+      );
       final message = response.message;
 
       return Message(
@@ -84,7 +83,7 @@ class ConversationsServiceGRPC implements ConversationsService {
           message.updatedAt.toDateTime(),
       );
     } catch (e) {
-      throw Exception('failed to send message: $e');
+      throw handleException(e, 'failed to send message');
     } finally {
       await channel.shutdown();
     }
@@ -92,7 +91,7 @@ class ConversationsServiceGRPC implements ConversationsService {
 
   @override
   Stream<Message> sendMessageStream(String conversationId, String content) {
-    final channel = ClientChannel(host, port: port);
+    final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
     try {
@@ -108,7 +107,7 @@ class ConversationsServiceGRPC implements ConversationsService {
           event.message.updatedAt.toDateTime(),
       ));
     } catch (e) {
-      throw Exception('failed to send message stream: $e');
+      throw handleException(e, 'failed to send message stream');
     }
   }
 }

@@ -1,26 +1,24 @@
-import 'package:ai/service/authenticator.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
-import 'package:grpc/grpc.dart';
+import 'package:ai/service/authenticator_service.dart';
+import 'package:ai/service/grpc_service.dart';
 
-class AuthenticatorServiceGRPC implements AuthenticatorService {
-  final String host;
-  final int port;
-
-  AuthenticatorServiceGRPC(this.host, this.port);
+final class GrpcAuthenticatorService extends GrpcService implements AuthenticatorService {
+  GrpcAuthenticatorService(super.host, super.port, super.webPort, super.secure);
 
   @override
   Future<String> signUp(String username, String password) async {
-    final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
+    final channel = createChannel();
     final client = api.AuthenticatorClient(channel);
 
     try {
       final response = await client.signUp(api.SignUpRequest()
         ..username = username
-        ..password = password);
+        ..password = password
+      );
 
       return response.token;
     } catch (e) {
-      throw Exception('failed to sign up: $e');
+      throw handleException(e, 'failed to sign up');
     } finally {
       await channel.shutdown();
     }
@@ -28,17 +26,18 @@ class AuthenticatorServiceGRPC implements AuthenticatorService {
 
   @override
   Future<String> signIn(String username, String password) async {
-    final channel = ClientChannel(host, port: port, options: const ChannelOptions(credentials: ChannelCredentials.insecure()));
+    final channel = createChannel();
     final client = api.AuthenticatorClient(channel);
 
     try {
       final response = await client.signIn(api.SignInRequest()
         ..username = username
-        ..password = password);
+        ..password = password
+      );
 
       return response.token;
     } catch (e) {
-      throw Exception('failed to sign in: $e');
+      throw handleException(e, 'failed to sign in');
     } finally {
       await channel.shutdown();
     }
