@@ -2,6 +2,9 @@ import 'package:ai/page/conversations.dart';
 import 'package:ai/page/login.dart';
 import 'package:ai/storage/token.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai/router.dart'
+  if (dart.library.html) 'package:flutter_web_plugins/flutter_web_plugins.dart'
+  as plugins;
 
 enum Routes {
   conversations,
@@ -61,3 +64,11 @@ class Router {
     },
   );
 }
+
+/// Use url path strategy only on web to successfully build
+/// on other platforms using conditional import
+void setUrlStrategy() {
+  plugins.usePathUrlStrategy();
+}
+
+void usePathUrlStrategy() {}

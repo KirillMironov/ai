@@ -4,17 +4,17 @@ import 'package:ai/router.dart';
 import 'package:ai/service/grpc_authenticator_service.dart';
 import 'package:ai/storage/token_shared_preferences.dart';
 import 'package:flutter/material.dart' hide Router;
-// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+  setUrlStrategy();
   final tokenStorage = TokenStorageSharedPreferences();
   final authenticatorService = GrpcAuthenticatorService('localhost', 8080, 9090, false);
   final loginPage = LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage);
   const conversationsPage = ConversationsPage();
   final router = Router(tokenStorage, loginPage, conversationsPage);
-  // usePathUrlStrategy();
   runApp(App(router: router.router()));
 }
 
