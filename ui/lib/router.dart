@@ -2,6 +2,7 @@ import 'package:ai/page/conversations_page.dart';
 import 'package:ai/page/login_page.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/token_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ai/router.dart' if (dart.library.html) 'package:flutter_web_plugins/flutter_web_plugins.dart'
     as plugins;
@@ -77,3 +78,7 @@ void setUrlStrategy() {
 }
 
 void usePathUrlStrategy() {}
+
+extension GoRouterHelper on BuildContext {
+  void goNamedID(String name, String id) => GoRouter.of(this).goNamed(name, pathParameters: {'id': id});
+}

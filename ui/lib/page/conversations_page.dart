@@ -1,4 +1,5 @@
 import 'package:ai/model/conversation.dart';
+import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
@@ -105,7 +106,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 2.0),
                             child: RoundedButton(
-                              onTap: () {},
+                              onTap: () => context.goNamedID(Routes.conversationByID.name, conversation!.id),
                               child: Text(
                                 conversation != null ? conversation.title : '',
                                 overflow: TextOverflow.ellipsis,
