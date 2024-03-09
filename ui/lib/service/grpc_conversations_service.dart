@@ -5,9 +5,13 @@ import 'package:ai/model/role.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/service/grpc_service.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
+import 'package:ai/storage/token_storage.dart';
+import 'package:grpc/grpc.dart';
 
 final class GrpcConversationsService extends GrpcService implements ConversationsService {
-  GrpcConversationsService(super.host, super.port, super.webPort, super.secure);
+  final TokenStorage tokenStorage;
+
+  GrpcConversationsService(super.host, super.port, super.webPort, super.secure, this.tokenStorage);
 
   @override
   Future<List<Conversation>> listConversations(int offset, int limit) async {
@@ -15,18 +19,23 @@ final class GrpcConversationsService extends GrpcService implements Conversation
     final client = api.ConversationsClient(channel);
 
     try {
-      final response = await client.listConversations(api.ListConversationsRequest()
-      ..limit = limit
-      ..offset = offset
+      final response = await client.listConversations(
+        api.ListConversationsRequest(
+          limit: limit,
+          offset: offset,
+        ),
+        options: _callOptionsMetadataJWT(),
       );
 
-      return response.conversations.map((e) => Conversation(
-        e.id,
-        e.title,
-        List.empty(),
-        e.createdAt.toDateTime(),
-        e.updatedAt.toDateTime()
-      )).toList();
+      return response.conversations
+          .map((e) => Conversation(
+                e.id,
+                e.title,
+                List.empty(),
+                e.createdAt.toDateTime(),
+                e.updatedAt.toDateTime(),
+              ))
+          .toList();
     } catch (e) {
       throw handleException(e, 'failed to list conversations');
     } finally {
@@ -40,22 +49,26 @@ final class GrpcConversationsService extends GrpcService implements Conversation
     final client = api.ConversationsClient(channel);
 
     try {
-      final response = await client.getConversation(api.GetConversationRequest(id: id));
+      final response = await client.getConversation(
+        api.GetConversationRequest(id: id),
+        options: _callOptionsMetadataJWT(),
+      );
       final conversation = response.conversation;
 
       return Conversation(
           conversation.id,
           conversation.title,
-          response.messages.map((e) => Message(
-              e.id,
-              e.role.toRole(),
-              e.content,
-              e.createdAt.toDateTime(),
-              e.updatedAt.toDateTime(),
-          )).toList(),
+          response.messages
+              .map((e) => Message(
+                    e.id,
+                    e.role.toRole(),
+                    e.content,
+                    e.createdAt.toDateTime(),
+                    e.updatedAt.toDateTime(),
+                  ))
+              .toList(),
           conversation.createdAt.toDateTime(),
-          conversation.updatedAt.toDateTime()
-      );
+          conversation.updatedAt.toDateTime());
     } catch (e) {
       throw handleException(e, 'failed to get conversation');
     } finally {
@@ -69,18 +82,21 @@ final class GrpcConversationsService extends GrpcService implements Conversation
     final client = api.ConversationsClient(channel);
 
     try {
-      final response = await client.sendMessage(api.SendMessageRequest()
-        ..conversationId = conversationId
-        ..content = content
+      final response = await client.sendMessage(
+        api.SendMessageRequest(
+          conversationId: conversationId,
+          content: content,
+        ),
+        options: _callOptionsMetadataJWT(),
       );
       final message = response.message;
 
       return Message(
-          message.id,
-          message.role.toRole(),
-          message.content,
-          message.createdAt.toDateTime(),
-          message.updatedAt.toDateTime(),
+        message.id,
+        message.role.toRole(),
+        message.content,
+        message.createdAt.toDateTime(),
+        message.updatedAt.toDateTime(),
       );
     } catch (e) {
       throw handleException(e, 'failed to send message');
@@ -95,20 +111,28 @@ final class GrpcConversationsService extends GrpcService implements Conversation
     final client = api.ConversationsClient(channel);
 
     try {
-      final request = api.SendMessageStreamRequest()
-        ..conversationId = conversationId
-        ..content = content;
+      final request = api.SendMessageStreamRequest(
+        conversationId: conversationId,
+        content: content,
+      );
 
-      return client.sendMessageStream(request).map((event) => Message(
-          event.message.id,
-          event.message.role.toRole(),
-          event.message.content,
-          event.message.createdAt.toDateTime(),
-          event.message.updatedAt.toDateTime(),
-      ));
+      return client.sendMessageStream(request, options: _callOptionsMetadataJWT()).map((event) => Message(
+            event.message.id,
+            event.message.role.toRole(),
+            event.message.content,
+            event.message.createdAt.toDateTime(),
+            event.message.updatedAt.toDateTime(),
+          ));
     } catch (e) {
       throw handleException(e, 'failed to send message stream');
     }
+  }
+
+  CallOptions _callOptionsMetadataJWT() {
+    final token = tokenStorage.getToken();
+    return token == null
+        ? throw Exception('jwt token no found in token storage')
+        : CallOptions(metadata: {'jwt': token});
   }
 }
 
