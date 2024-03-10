@@ -4,6 +4,7 @@ import 'package:ai/service/conversations_service.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ConversationsPage extends StatefulWidget {
   final ConversationsService conversationsService;
@@ -71,7 +72,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
     return Column(
       children: [
         RoundedButton(
-          onTap: () {},
+          onTap: () => context.goNamed(Routes.conversations.name),
           color: buttonColor,
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

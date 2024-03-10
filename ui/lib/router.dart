@@ -1,5 +1,6 @@
 import 'package:ai/page/conversations_page.dart';
 import 'package:ai/page/login_page.dart';
+import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/token_storage.dart';
 import 'package:flutter/material.dart';
@@ -26,37 +27,28 @@ enum Routes {
 
 class Router {
   final TokenStorage tokenStorage;
+  final AuthenticatorService authenticatorService;
   final ConversationsService conversationsService;
-  final LoginPage loginPage;
-  final ConversationsPage conversationsPage;
 
-  Router(
-    this.tokenStorage,
-    this.conversationsService,
-    this.loginPage,
-    this.conversationsPage,
-  );
+  Router(this.tokenStorage, this.authenticatorService, this.conversationsService);
 
   GoRouter router() => GoRouter(
         routes: [
-          GoRoute(
-            name: Routes.conversations.name,
-            path: Routes.conversations.path,
-            builder: (context, state) => conversationsPage,
+          Route(
+            route: Routes.conversations,
+            childBuilder: (state) => ConversationsPage(conversationsService: conversationsService),
           ),
-          GoRoute(
-            name: Routes.login.name,
-            path: Routes.login.path,
-            builder: (context, state) => loginPage,
+          Route(
+            route: Routes.login,
+            childBuilder: (state) =>
+                LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage),
           ),
-          GoRoute(
-            name: Routes.conversationByID.name,
-            path: Routes.conversationByID.path,
-            builder: (context, state) {
-              final conversationID = state.pathParameters['id'];
+          Route(
+            route: Routes.conversationByID,
+            childBuilder: (state) {
               return ConversationsPage(
                 conversationsService: conversationsService,
-                conversationID: conversationID,
+                conversationID: state.pathParameterID(),
               );
             },
           ),
@@ -71,6 +63,27 @@ class Router {
       );
 }
 
+class Route extends GoRoute {
+  final Routes route;
+  final Function(GoRouterState) childBuilder;
+
+  Route({required this.route, required this.childBuilder})
+      : super(
+    name: route.name,
+    path: route.path,
+    pageBuilder: (context, state) => CustomTransitionPage(
+      key: state.pageKey,
+      child: childBuilder(state),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+          child: child,
+        );
+      },
+    ),
+  );
+}
+
 /// Use url path strategy only on web to successfully build
 /// on other platforms using conditional import
 void setUrlStrategy() {
@@ -81,4 +94,8 @@ void usePathUrlStrategy() {}
 
 extension GoRouterHelper on BuildContext {
   void goNamedID(String name, String id) => GoRouter.of(this).goNamed(name, pathParameters: {'id': id});
+}
+
+extension GoRouterStateHelper on GoRouterState {
+  String? pathParameterID() => pathParameters['id'];
 }

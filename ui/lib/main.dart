@@ -1,5 +1,3 @@
-import 'package:ai/page/conversations_page.dart';
-import 'package:ai/page/login_page.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/grpc_authenticator_service.dart';
 import 'package:ai/service/grpc_conversations_service.dart';
@@ -23,9 +21,7 @@ void main() {
   final tokenStorage = SharedPreferencesTokenStorage();
   final authenticatorService = GrpcAuthenticatorService(aiHost, aiPort, aiWebPort, aiSecure);
   final conversationsService = GrpcConversationsService(aiHost, aiPort, aiWebPort, aiSecure, tokenStorage);
-  final loginPage = LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage);
-  final conversationsPage = ConversationsPage(conversationsService: conversationsService);
-  final router = Router(tokenStorage, conversationsService, loginPage, conversationsPage);
+  final router = Router(tokenStorage, authenticatorService, conversationsService);
 
   runApp(App(router: router.router()));
 }
