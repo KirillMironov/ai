@@ -4,7 +4,6 @@ import 'package:ai/service/conversations_service.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class ConversationsPage extends StatefulWidget {
   final ConversationsService conversationsService;
@@ -72,7 +71,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
     return Column(
       children: [
         RoundedButton(
-          onTap: () => context.goNamed(Routes.conversations.name),
+          onTap: () => context.goRoute(Routes.conversations),
           color: buttonColor,
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,7 +106,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 2.0),
                             child: RoundedButton(
-                              onTap: () => context.goNamedID(Routes.conversationByID.name, conversation!.id),
+                              onTap: () => context.goRouteID(Routes.conversationByID, conversation!.id),
                               child: Text(
                                 conversation != null ? conversation.title : '',
                                 overflow: TextOverflow.ellipsis,

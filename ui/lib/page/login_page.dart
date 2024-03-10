@@ -3,7 +3,6 @@ import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/storage/token_storage.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatefulWidget {
   final AuthenticatorService authenticatorService;
@@ -123,6 +122,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (!mounted) return;
-    context.goNamed(Routes.conversations.name);
+    context.goRoute(Routes.conversations);
   }
 }

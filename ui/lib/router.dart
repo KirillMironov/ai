@@ -69,19 +69,19 @@ class Route extends GoRoute {
 
   Route({required this.route, required this.childBuilder})
       : super(
-    name: route.name,
-    path: route.path,
-    pageBuilder: (context, state) => CustomTransitionPage(
-      key: state.pageKey,
-      child: childBuilder(state),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-          child: child,
+          name: route.name,
+          path: route.path,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: childBuilder(state),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              );
+            },
+          ),
         );
-      },
-    ),
-  );
 }
 
 /// Use url path strategy only on web to successfully build
@@ -93,7 +93,10 @@ void setUrlStrategy() {
 void usePathUrlStrategy() {}
 
 extension GoRouterHelper on BuildContext {
-  void goNamedID(String name, String id) => GoRouter.of(this).goNamed(name, pathParameters: {'id': id});
+  void goRoute(Routes route) => GoRouter.of(this).goNamed(route.name);
+
+  void goRouteID(Routes route, String id) =>
+      GoRouter.of(this).goNamed(route.name, pathParameters: {'id': id});
 }
 
 extension GoRouterStateHelper on GoRouterState {
