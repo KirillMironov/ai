@@ -11,10 +11,10 @@ final class GrpcAuthenticatorService extends GrpcService implements Authenticato
     final client = api.AuthenticatorClient(channel);
 
     try {
-      final response = await client.signUp(api.SignUpRequest()
-        ..username = username
-        ..password = password
-      );
+      final response = await client.signUp(api.SignUpRequest(
+        username: username,
+        password: password,
+      ));
 
       return response.token;
     } catch (e) {
@@ -30,10 +30,10 @@ final class GrpcAuthenticatorService extends GrpcService implements Authenticato
     final client = api.AuthenticatorClient(channel);
 
     try {
-      final response = await client.signIn(api.SignInRequest()
-        ..username = username
-        ..password = password
-      );
+      final response = await client.signIn(api.SignInRequest(
+        username: username,
+        password: password,
+      ));
 
       return response.token;
     } catch (e) {

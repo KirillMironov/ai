@@ -14,9 +14,8 @@ class RoundedButton extends StatelessWidget {
     this.color,
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? padding,
-  }) :
-    borderRadius = borderRadius ?? BorderRadius.circular(12.0),
-    padding = padding ?? const EdgeInsets.all(15.0);
+  })  : borderRadius = borderRadius ?? BorderRadius.circular(12.0),
+        padding = padding ?? const EdgeInsets.all(15.0);
 
   @override
   Widget build(BuildContext context) {

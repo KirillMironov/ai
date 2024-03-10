@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:grpc/grpc_or_grpcweb.dart';
 
 base class GrpcService {
@@ -8,6 +9,7 @@ base class GrpcService {
 
   GrpcService(this.host, this.port, this.webPort, this.secure);
 
+  @protected
   GrpcOrGrpcWebClientChannel createChannel() {
     return GrpcOrGrpcWebClientChannel.toSeparatePorts(
       host: host,
@@ -18,6 +20,7 @@ base class GrpcService {
     );
   }
 
+  @protected
   Exception handleException(Object e, String message) {
     switch (e) {
       case final GrpcError e:

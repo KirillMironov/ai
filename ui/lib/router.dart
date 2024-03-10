@@ -40,8 +40,7 @@ class Router {
           ),
           Route(
             route: Routes.login,
-            childBuilder: (state) =>
-                LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage),
+            childBuilder: (state) => LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage),
           ),
           Route(
             route: Routes.conversationByID,
@@ -95,8 +94,7 @@ void usePathUrlStrategy() {}
 extension GoRouterHelper on BuildContext {
   void goRoute(Routes route) => GoRouter.of(this).goNamed(route.name);
 
-  void goRouteID(Routes route, String id) =>
-      GoRouter.of(this).goNamed(route.name, pathParameters: {'id': id});
+  void goRouteID(Routes route, String id) => GoRouter.of(this).goNamed(route.name, pathParameters: {'id': id});
 }
 
 extension GoRouterStateHelper on GoRouterState {
