@@ -1,24 +1,20 @@
 import 'package:ai/router.dart';
 import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/storage/token_storage.dart';
+import 'package:ai/widget/material_banned_dismiss.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   final AuthenticatorService authenticatorService;
   final TokenStorage tokenStorage;
 
-  const LoginPage({
+  LoginPage({
     super.key,
     required this.authenticatorService,
     required this.tokenStorage,
   });
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -48,9 +44,9 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 15.0),
                     Row(
                       children: [
-                        _button('Sign In', () => _login(widget.authenticatorService.signIn)),
+                        _button('Sign In', () => _login(context, authenticatorService.signIn)),
                         const SizedBox(width: 10.0),
-                        _button('Sign Up', () => _login(widget.authenticatorService.signUp)),
+                        _button('Sign Up', () => _login(context, authenticatorService.signUp)),
                       ],
                     )
                   ],
@@ -58,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        )
+        ),
       ),
     );
   }
@@ -97,31 +93,20 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _login(Future<String> Function(String username, String password) loginAction) async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  void _login(BuildContext context, Future<String> Function(String username, String password) loginAction) async {
+    if (!_formKey.currentState!.validate()) return;
 
     try {
       final token = await loginAction(_usernameController.text, _passwordController.text);
-      widget.tokenStorage.saveToken(token);
-    } catch(e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showMaterialBanner(
-          MaterialBanner(
-            content: SelectableText(e.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => ScaffoldMessenger.of(context).clearMaterialBanners(),
-                child: const Text('DISMISS'),
-              ),
-            ],
-          )
-      );
+      tokenStorage.saveToken(token);
+    } catch (e) {
+      if (!context.mounted) return;
+      MaterialBannerDismiss(context, e.toString()).show();
       return;
     }
 
-    if (!mounted) return;
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
     context.goRoute(Routes.conversations);
   }
 }
