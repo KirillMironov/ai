@@ -1,6 +1,7 @@
 import 'package:ai/model/conversation.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
+import 'package:ai/widget/custom_future_builder.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
@@ -92,33 +93,28 @@ class _ConversationsPageState extends State<ConversationsPage> {
         ),
         const SizedBox(height: 10.0),
         Expanded(
-          child: FutureBuilder<List<Conversation>>(
+          child: CustomFutureBuilder<List<Conversation>>(
             future: widget.conversationsService.listConversations(0, 50),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return snapshot.data == null || snapshot.data!.isEmpty
-                    ? const Center(child: Text('No conversations'))
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(right: 15.0),
-                        itemCount: snapshot.data != null ? snapshot.data!.length : 0,
-                        itemBuilder: (context, index) {
-                          final conversation = snapshot.data?[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2.0),
-                            child: RoundedButton(
-                              onTap: () => context.goRouteID(Routes.conversationByID, conversation!.id),
-                              child: Text(
-                                conversation != null ? conversation.title : '',
-                                overflow: TextOverflow.ellipsis,
-                              ),
+            builder: (conversations) {
+              return conversations.isEmpty
+                  ? const Center(child: Text('No conversations'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(right: 15.0),
+                      itemCount: conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = conversations[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: RoundedButton(
+                            onTap: () => context.goRouteID(Routes.conversationByID, conversation.id),
+                            child: Text(
+                              conversation.title,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          );
-                        },
-                      );
-              } else if (snapshot.hasError) {
-                return Center(child: SelectableText(snapshot.error.toString()));
-              }
-              return const CircularProgressIndicator();
+                          ),
+                        );
+                      },
+                    );
             },
           ),
         ),
@@ -156,27 +152,22 @@ class _ConversationsPageState extends State<ConversationsPage> {
         Expanded(
           child: widget.conversationID == null
               ? const Center(child: Text('How can I help you today?'))
-              : FutureBuilder<Conversation>(
+              : CustomFutureBuilder<Conversation>(
                   future: widget.conversationsService.getConversation(widget.conversationID!),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return snapshot.data == null || snapshot.data!.messages.isEmpty
-                          ? const Center(child: Text('No messages'))
-                          : ListView.builder(
-                              padding: const EdgeInsets.only(right: 15.0),
-                              itemCount: snapshot.data != null ? snapshot.data!.messages.length : 0,
-                              itemBuilder: (context, index) {
-                                final message = snapshot.data!.messages[index];
-                                return MessageItem(
-                                  role: message.role,
-                                  content: message.content,
-                                );
-                              },
-                            );
-                    } else if (snapshot.hasError) {
-                      return Center(child: SelectableText(snapshot.error.toString()));
-                    }
-                    return const CircularProgressIndicator();
+                  builder: (conversation) {
+                    return conversation.messages.isEmpty
+                        ? const Center(child: Text('No messages'))
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            itemCount: conversation.messages.length,
+                            itemBuilder: (context, index) {
+                              final message = conversation.messages[index];
+                              return MessageItem(
+                                role: message.role,
+                                content: message.content,
+                              );
+                            },
+                          );
                   },
                 ),
         ),
