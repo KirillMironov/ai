@@ -5,6 +5,7 @@ import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:ai/router.dart' if (dart.library.html) 'package:flutter_web_plugins/flutter_web_plugins.dart'
     as plugins;
 
@@ -54,7 +55,8 @@ class Router {
         ],
         redirect: (context, state) {
           try {
-            return tokenStorage.getToken() == null
+            final token = tokenStorage.getToken();
+            return token == null || JwtDecoder.isExpired(token)
                 ? Routes.login.path
                 : state.matchedLocation == Routes.login.path
                     ? Routes.conversations.path
