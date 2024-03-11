@@ -54,7 +54,11 @@ class Router {
         ],
         redirect: (context, state) {
           try {
-            return tokenStorage.getToken() == null ? Routes.login.path : null;
+            return tokenStorage.getToken() == null
+                ? Routes.login.path
+                : state.matchedLocation == Routes.login.path
+                    ? Routes.conversations.path
+                    : null;
           } catch (_) {
             return Routes.login.path;
           }
