@@ -1,7 +1,11 @@
 import 'package:ai/model/conversation.dart';
+import 'package:ai/model/message.dart';
+import 'package:ai/model/role.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/widget/custom_future_builder.dart';
+import 'package:ai/widget/custom_scroll_controller.dart';
+import 'package:ai/widget/material_banned_dismiss.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +25,20 @@ class ConversationsPage extends StatefulWidget {
 }
 
 class _ConversationsPageState extends State<ConversationsPage> {
-  final buttonColor = const Color.fromRGBO(31, 31, 31, 1.0);
+  final _buttonColor = const Color.fromRGBO(31, 31, 31, 1.0);
+  final _messagesScrollController = CustomScrollController();
+  final _messageInputController = TextEditingController();
+
+  late Future<List<Message>> _messagesFuture;
+  List<Message> _messages = List.empty(growable: true);
+
+  @override
+  void initState() {
+    if (widget.conversationID != null) {
+      _messagesFuture = widget.conversationsService.getMessagesByConversationID(widget.conversationID!);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +90,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
       children: [
         RoundedButton(
           onTap: () => context.goRoute(Routes.conversations),
-          color: buttonColor,
+          color: _buttonColor,
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -93,7 +110,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
         ),
         const SizedBox(height: 10.0),
         Expanded(
-          child: CustomFutureBuilder<List<Conversation>>(
+          child: CustomFutureBuilder<List<ConversationDescription>>(
             future: widget.conversationsService.listConversations(0, 50),
             builder: (conversations) {
               return conversations.isEmpty
@@ -123,7 +140,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
           alignment: Alignment.bottomCenter,
           child: RoundedButton(
             onTap: () {},
-            color: buttonColor,
+            color: _buttonColor,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -150,18 +167,20 @@ class _ConversationsPageState extends State<ConversationsPage> {
     return Column(
       children: [
         Expanded(
-          child: widget.conversationID == null
+          child: widget.conversationID == null && _messages.isEmpty
               ? const Center(child: Text('How can I help you today?'))
-              : CustomFutureBuilder<Conversation>(
-                  future: widget.conversationsService.getConversation(widget.conversationID!),
-                  builder: (conversation) {
-                    return conversation.messages.isEmpty
+              : CustomFutureBuilder<List<Message>>(
+                  future: _messagesFuture,
+                  builder: (messages) {
+                    _messages = messages;
+                    return messages.isEmpty
                         ? const Center(child: Text('No messages'))
                         : ListView.builder(
+                            controller: _messagesScrollController,
                             padding: const EdgeInsets.only(right: 15.0),
-                            itemCount: conversation.messages.length,
+                            itemCount: messages.length,
                             itemBuilder: (context, index) {
-                              final message = conversation.messages[index];
+                              final message = messages[index];
                               return MessageItem(
                                 role: message.role,
                                 content: message.content,
@@ -172,6 +191,9 @@ class _ConversationsPageState extends State<ConversationsPage> {
                 ),
         ),
         TextField(
+          controller: _messageInputController,
+          minLines: 1,
+          maxLines: 10,
           decoration: InputDecoration(
             hintText: 'Type a message...',
             border: OutlineInputBorder(
@@ -181,7 +203,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
               padding: const EdgeInsets.only(right: 10.0),
               child: IconButton(
                 icon: const Icon(Icons.send),
-                onPressed: () {},
+                onPressed: () => _sendMessageStream(),
               ),
             ),
           ),
@@ -189,4 +211,37 @@ class _ConversationsPageState extends State<ConversationsPage> {
       ],
     );
   }
+
+  void _sendMessageStream() async {
+    final content = _messageInputController.text;
+    if (content.isEmpty) return;
+
+    setState(() {
+      _messages.add(_createMessage(Role.user, content));
+      _messages.add(_createMessage(Role.assistant, ''));
+      _messagesFuture = Future(() => _messages);
+    });
+
+    _messageInputController.clear();
+    _messagesScrollController.scrollDown();
+
+    try {
+      await widget.conversationsService.sendMessageStream(widget.conversationID ?? '', content).forEach((e) {
+        setState(() {
+          _messages.last.content += e.content;
+        });
+      });
+    } catch (e) {
+      if (!mounted) return;
+      MaterialBannerDismiss(context, e.toString()).show();
+      return;
+    }
+
+    final conversationID = await widget.conversationsService.listConversations(0, 1).then((value) => value.first.id);
+
+    if (!mounted) return;
+    context.goRouteID(Routes.conversationByID, conversationID);
+  }
+
+  Message _createMessage(Role role, String content) => Message('', role, content, DateTime.now(), DateTime.now());
 }

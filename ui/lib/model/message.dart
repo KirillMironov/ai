@@ -3,7 +3,7 @@ import 'package:ai/model/role.dart';
 class Message {
   final String id;
   final Role role;
-  final String content;
+  String content;
   final DateTime createdAt;
   final DateTime updatedAt;
 

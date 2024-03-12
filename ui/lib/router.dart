@@ -77,7 +77,7 @@ class Route extends GoRoute {
           name: route.name,
           path: route.path,
           pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
+            key: UniqueKey(),
             child: childBuilder(state),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(

@@ -14,7 +14,7 @@ final class GrpcConversationsService extends GrpcService implements Conversation
   GrpcConversationsService(super.host, super.port, super.webPort, super.secure, this.tokenStorage);
 
   @override
-  Future<List<Conversation>> listConversations(int offset, int limit) async {
+  Future<List<ConversationDescription>> listConversations(int offset, int limit) async {
     final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
@@ -28,10 +28,9 @@ final class GrpcConversationsService extends GrpcService implements Conversation
       );
 
       return response.conversations
-          .map((e) => Conversation(
+          .map((e) => ConversationDescription(
                 e.id,
                 e.title,
-                List.empty(),
                 e.createdAt.toDateTime(),
                 e.updatedAt.toDateTime(),
               ))
@@ -44,31 +43,25 @@ final class GrpcConversationsService extends GrpcService implements Conversation
   }
 
   @override
-  Future<Conversation> getConversation(String id) async {
+  Future<List<Message>> getMessagesByConversationID(String conversationID) async {
     final channel = createChannel();
     final client = api.ConversationsClient(channel);
 
     try {
       final response = await client.getConversation(
-        api.GetConversationRequest(id: id),
+        api.GetConversationRequest(id: conversationID),
         options: _callOptionsMetadataJWT(),
       );
-      final conversation = response.conversation;
 
-      return Conversation(
-          conversation.id,
-          conversation.title,
-          response.messages
-              .map((e) => Message(
-                    e.id,
-                    e.role.toRole(),
-                    e.content,
-                    e.createdAt.toDateTime(),
-                    e.updatedAt.toDateTime(),
-                  ))
-              .toList(),
-          conversation.createdAt.toDateTime(),
-          conversation.updatedAt.toDateTime());
+      return response.messages
+          .map((e) => Message(
+                e.id,
+                e.role.toRole(),
+                e.content,
+                e.createdAt.toDateTime(),
+                e.updatedAt.toDateTime(),
+              ))
+          .toList();
     } catch (e) {
       throw handleException(e, 'failed to get conversation');
     } finally {

@@ -9,3 +9,12 @@ class Conversation {
 
   Conversation(this.id, this.title, this.messages, this.createdAt, this.updatedAt);
 }
+
+class ConversationDescription {
+  final String id;
+  final String title;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  ConversationDescription(this.id, this.title, this.createdAt, this.updatedAt);
+}
