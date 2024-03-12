@@ -255,40 +255,11 @@ func TestConversations_SendMessage(t *testing.T) {
 		wantMessage model.Message
 		mocks       conversationsMocks
 	}{
-		{ //nolint:dupl
-			name: "role user",
+		{
+			name: "success",
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
-				Content:        testContent,
-			},
-			wantErr:     false,
-			wantMessage: model.Message{Role: model.RoleUser, Content: testContent},
-			mocks: conversationsMocks{
-				authenticatorService: &mock.AuthenticatorService{
-					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
-						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
-					},
-				},
-				conversationsStorage: &mock.ConversationsStorage{
-					SaveConversationFunc: func(_ context.Context, _ model.Conversation) error {
-						return nil
-					},
-				},
-				llmClient: &mock.LLMClient{
-					ChatCompletionFunc: func(_ context.Context, _ *api.ChatCompletionRequest, _ ...grpc.CallOption) (*api.ChatCompletionResponse, error) {
-						return &api.ChatCompletionResponse{Message: &api.Message{Role: api.Role_ROLE_USER, Content: testContent}}, nil
-					},
-				},
-			},
-		},
-		{ //nolint:dupl
-			name: "role assistant",
-			request: model.SendMessageRequest{
-				Token:          testToken,
-				ConversationID: "",
-				Role:           model.RoleAssistant,
 				Content:        testContent,
 			},
 			wantErr:     false,
@@ -327,7 +298,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -351,7 +321,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -371,7 +340,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -395,7 +363,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -423,7 +390,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -451,7 +417,6 @@ func TestConversations_SendMessage(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -511,11 +476,10 @@ func TestConversations_SendMessageStream(t *testing.T) {
 		mocks       conversationsMocks
 	}{
 		{
-			name: "role user",
+			name: "success",
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     false,
@@ -535,30 +499,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			},
 		},
 		{
-			name: "role assistant",
-			request: model.SendMessageRequest{
-				Token:          testToken,
-				ConversationID: "",
-				Role:           model.RoleAssistant,
-				Content:        testContent,
-			},
-			wantErr:     false,
-			wantContent: testContent,
-			mocks: conversationsMocks{
-				authenticatorService: &mock.AuthenticatorService{
-					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
-						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
-					},
-				},
-				conversationsStorage: &mock.ConversationsStorage{
-					SaveConversationFunc: func(_ context.Context, _ model.Conversation) error {
-						return nil
-					},
-				},
-				llmClient: llmClientChatCompletionStream(api.Role_ROLE_LLM, testContent),
-			},
-		},
-		{
 			name:        "empty content",
 			request:     model.SendMessageRequest{Content: ""},
 			wantErr:     true,
@@ -574,7 +514,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -598,7 +537,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -618,7 +556,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: testConversationID,
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -642,7 +579,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,
@@ -670,7 +606,6 @@ func TestConversations_SendMessageStream(t *testing.T) {
 			request: model.SendMessageRequest{
 				Token:          testToken,
 				ConversationID: "",
-				Role:           model.RoleUser,
 				Content:        testContent,
 			},
 			wantErr:     true,

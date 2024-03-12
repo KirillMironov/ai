@@ -93,25 +93,14 @@ func (c Conversations) SendMessage(ctx context.Context, request model.SendMessag
 		return model.Message{}, err
 	}
 
-	now := time.Now()
-	conversation.Messages = append(conversation.Messages, model.Message{
-		ID:        uuid.NewString(),
-		Role:      request.Role,
-		Content:   request.Content,
-		CreatedAt: now,
-		UpdatedAt: now,
-	})
+	conversation.Messages = append(conversation.Messages, newMessage(model.RoleUser, request.Content))
 
 	response, err := c.llmClient.ChatCompletion(ctx, &api.ChatCompletionRequest{Messages: messagesToAPI(conversation.Messages)})
 	if err != nil {
 		return model.Message{}, fmt.Errorf("send message to LLM: %w", err)
 	}
 
-	now = time.Now()
-	message := messageFromAPI(response.GetMessage())
-	message.ID = uuid.NewString()
-	message.CreatedAt = now
-	message.UpdatedAt = now
+	message := newMessage(model.RoleAssistant, response.GetMessage().GetContent())
 	conversation.Messages = append(conversation.Messages, message)
 	conversation.UpdatedAt = time.Now()
 
@@ -137,40 +126,29 @@ func (c Conversations) SendMessageStream(ctx context.Context, request model.Send
 		return err
 	}
 
-	now := time.Now()
-	conversation.Messages = append(conversation.Messages, model.Message{
-		ID:        uuid.NewString(),
-		Role:      request.Role,
-		Content:   request.Content,
-		CreatedAt: now,
-		UpdatedAt: now,
-	})
+	conversation.Messages = append(conversation.Messages, newMessage(model.RoleUser, request.Content))
 
 	stream, err := c.llmClient.ChatCompletionStream(ctx, &api.ChatCompletionStreamRequest{Messages: messagesToAPI(conversation.Messages)})
 	if err != nil {
 		return fmt.Errorf("send message to LLM: %w", err)
 	}
 
-	var message model.Message
+	message := newMessage(model.RoleAssistant, "")
 
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		msg := messageFromAPI(response.GetMessage())
-		if message.Role == 0 {
-			message.Role = msg.Role
-		}
-		message.Content += msg.Content
-		if err = onChunk(msg); err != nil {
+		content := response.GetMessage().GetContent()
+		message.Content += content
+		chunkMessage := message
+		chunkMessage.Content = content
+		if err = onChunk(chunkMessage); err != nil {
 			return err
 		}
 	}
-	now = time.Now()
-	message.ID = uuid.NewString()
-	message.CreatedAt = now
-	message.UpdatedAt = now
+
 	conversation.Messages = append(conversation.Messages, message)
 	conversation.UpdatedAt = time.Now()
 
@@ -218,6 +196,17 @@ func (c Conversations) getOrCreateConversation(ctx context.Context, userID, conv
 	return conversation, nil
 }
 
+func newMessage(role model.Role, content string) model.Message {
+	now := time.Now()
+	return model.Message{
+		ID:        uuid.NewString(),
+		Role:      role,
+		Content:   content,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+}
+
 func messagesToAPI(messages []model.Message) []*api.Message {
 	apiMessages := make([]*api.Message, 0, len(messages))
 
@@ -239,23 +228,5 @@ func roleToAPI(role model.Role) api.Role {
 		return api.Role_ROLE_USER
 	default:
 		return api.Role_ROLE_UNSPECIFIED
-	}
-}
-
-func messageFromAPI(apiMessage *api.Message) model.Message {
-	return model.Message{
-		Role:    roleFromAPI(apiMessage.GetRole()),
-		Content: apiMessage.GetContent(),
-	}
-}
-
-func roleFromAPI(apiRole api.Role) model.Role {
-	switch apiRole {
-	case api.Role_ROLE_LLM:
-		return model.RoleAssistant
-	case api.Role_ROLE_USER:
-		return model.RoleUser
-	default:
-		return 0
 	}
 }

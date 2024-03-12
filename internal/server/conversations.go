@@ -73,7 +73,6 @@ func (c Conversations) SendMessage(ctx context.Context, request *api.SendMessage
 	req := model.SendMessageRequest{
 		Token:          token,
 		ConversationID: request.GetConversationId(),
-		Role:           model.RoleUser,
 		Content:        request.GetContent(),
 	}
 
@@ -95,7 +94,6 @@ func (c Conversations) SendMessageStream(request *api.SendMessageStreamRequest, 
 	req := model.SendMessageRequest{
 		Token:          token,
 		ConversationID: request.GetConversationId(),
-		Role:           model.RoleUser,
 		Content:        request.GetContent(),
 	}
 
