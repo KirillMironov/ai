@@ -31,6 +31,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
   late Future<List<Message>> _messagesFuture;
   List<Message> _messages = List.empty(growable: true);
+  bool _isSendButtonEnabled = true;
 
   @override
   void initState() {
@@ -231,10 +232,9 @@ class _ConversationsPageState extends State<ConversationsPage> {
             ),
             suffixIcon: Padding(
               padding: const EdgeInsets.only(right: 10.0),
-              child: IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () => _sendMessageStream(),
-              ),
+              child: _isSendButtonEnabled
+                  ? IconButton(icon: const Icon(Icons.send), onPressed: () => _sendMessageStream())
+                  : IconButton(icon: const Icon(Icons.send), onPressed: null, color: Colors.grey.withOpacity(0.5)),
             ),
           ),
         ),
@@ -247,6 +247,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
     if (content.isEmpty) return;
 
     setState(() {
+      _isSendButtonEnabled = false;
       _messages.add(_createMessage(Role.user, content));
       _messages.add(_createMessage(Role.assistant, ''));
       _messagesFuture = Future(() => _messages);
@@ -265,6 +266,10 @@ class _ConversationsPageState extends State<ConversationsPage> {
       if (!mounted) return;
       MaterialBannerDismiss(context, e.toString()).show();
       return;
+    } finally {
+      setState(() {
+        _isSendButtonEnabled = true;
+      });
     }
 
     final conversationID = await widget.conversationsService.listConversations(0, 1).then((value) => value.first.id);
