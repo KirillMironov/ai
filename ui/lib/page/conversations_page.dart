@@ -251,15 +251,15 @@ class _ConversationsPageState extends State<ConversationsPage> {
       _messages.add(_createMessage(Role.user, content));
       _messages.add(_createMessage(Role.assistant, ''));
       _messagesFuture = Future(() => _messages);
+      _messageInputController.clear();
+      _messagesScrollController.scrollDown();
     });
-
-    _messageInputController.clear();
-    _messagesScrollController.scrollDown();
 
     try {
       await widget.conversationsService.sendMessageStream(widget.conversationID ?? '', content).forEach((e) {
         setState(() {
           _messages.last.content += e.content;
+          _messagesScrollController.scrollDown();
         });
       });
     } catch (e) {
