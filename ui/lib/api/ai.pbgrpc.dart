@@ -16,6 +16,7 @@ import 'package:grpc/service_api.dart' as $grpc;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'ai.pb.dart' as $0;
+import 'google/protobuf/empty.pb.dart' as $1;
 
 export 'ai.pb.dart';
 
@@ -87,6 +88,10 @@ class ConversationsClient extends $grpc.Client {
       '/ai.Conversations/GetConversation',
       ($0.GetConversationRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.GetConversationResponse.fromBuffer(value));
+  static final _$deleteConversation = $grpc.ClientMethod<$0.DeleteConversationRequest, $1.Empty>(
+      '/ai.Conversations/DeleteConversation',
+      ($0.DeleteConversationRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $1.Empty.fromBuffer(value));
   static final _$sendMessage = $grpc.ClientMethod<$0.SendMessageRequest, $0.SendMessageResponse>(
       '/ai.Conversations/SendMessage',
       ($0.SendMessageRequest value) => value.writeToBuffer(),
@@ -108,6 +113,10 @@ class ConversationsClient extends $grpc.Client {
 
   $grpc.ResponseFuture<$0.GetConversationResponse> getConversation($0.GetConversationRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getConversation, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Empty> deleteConversation($0.DeleteConversationRequest request, {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$deleteConversation, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.SendMessageResponse> sendMessage($0.SendMessageRequest request, {$grpc.CallOptions? options}) {
@@ -138,6 +147,13 @@ abstract class ConversationsServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.GetConversationRequest.fromBuffer(value),
         ($0.GetConversationResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DeleteConversationRequest, $1.Empty>(
+        'DeleteConversation',
+        deleteConversation_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.DeleteConversationRequest.fromBuffer(value),
+        ($1.Empty value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.SendMessageRequest, $0.SendMessageResponse>(
         'SendMessage',
         sendMessage_Pre,
@@ -162,6 +178,10 @@ abstract class ConversationsServiceBase extends $grpc.Service {
     return getConversation(call, await request);
   }
 
+  $async.Future<$1.Empty> deleteConversation_Pre($grpc.ServiceCall call, $async.Future<$0.DeleteConversationRequest> request) async {
+    return deleteConversation(call, await request);
+  }
+
   $async.Future<$0.SendMessageResponse> sendMessage_Pre($grpc.ServiceCall call, $async.Future<$0.SendMessageRequest> request) async {
     return sendMessage(call, await request);
   }
@@ -172,6 +192,7 @@ abstract class ConversationsServiceBase extends $grpc.Service {
 
   $async.Future<$0.ListConversationsResponse> listConversations($grpc.ServiceCall call, $0.ListConversationsRequest request);
   $async.Future<$0.GetConversationResponse> getConversation($grpc.ServiceCall call, $0.GetConversationRequest request);
+  $async.Future<$1.Empty> deleteConversation($grpc.ServiceCall call, $0.DeleteConversationRequest request);
   $async.Future<$0.SendMessageResponse> sendMessage($grpc.ServiceCall call, $0.SendMessageRequest request);
   $async.Stream<$0.SendMessageStreamResponse> sendMessageStream($grpc.ServiceCall call, $0.SendMessageStreamRequest request);
 }

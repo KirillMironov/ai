@@ -70,6 +70,23 @@ final class GrpcConversationsService extends GrpcService implements Conversation
   }
 
   @override
+  Future<void> deleteConversationByID(String conversationID) async {
+    final channel = createChannel();
+    final client = api.ConversationsClient(channel);
+
+    try {
+      await client.deleteConversation(
+        api.DeleteConversationRequest(id: conversationID),
+        options: _callOptionsMetadataJWT(),
+      );
+    } catch (e) {
+      throw handleException(e, 'failed to delete conversation');
+    } finally {
+      await channel.shutdown();
+    }
+  }
+
+  @override
   Future<Message> sendMessage(String conversationId, String content) async {
     final channel = createChannel();
     final client = api.ConversationsClient(channel);

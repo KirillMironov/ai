@@ -14,7 +14,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'ai.pbenum.dart';
-import 'google/protobuf/timestamp.pb.dart' as $1;
+import 'google/protobuf/timestamp.pb.dart' as $2;
 
 export 'ai.pbenum.dart';
 
@@ -464,6 +464,56 @@ class GetConversationResponse extends $pb.GeneratedMessage {
   $core.List<Message> get messages => $_getList(1);
 }
 
+class DeleteConversationRequest extends $pb.GeneratedMessage {
+  factory DeleteConversationRequest({
+    $core.String? id,
+  }) {
+    final $result = create();
+    if (id != null) {
+      $result.id = id;
+    }
+    return $result;
+  }
+  DeleteConversationRequest._() : super();
+  factory DeleteConversationRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteConversationRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeleteConversationRequest', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteConversationRequest clone() => DeleteConversationRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteConversationRequest copyWith(void Function(DeleteConversationRequest) updates) => super.copyWith((message) => updates(message as DeleteConversationRequest)) as DeleteConversationRequest;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DeleteConversationRequest create() => DeleteConversationRequest._();
+  DeleteConversationRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteConversationRequest> createRepeated() => $pb.PbList<DeleteConversationRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteConversationRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteConversationRequest>(create);
+  static DeleteConversationRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+}
+
 class SendMessageRequest extends $pb.GeneratedMessage {
   factory SendMessageRequest({
     $core.String? conversationId,
@@ -700,8 +750,8 @@ class Conversation extends $pb.GeneratedMessage {
   factory Conversation({
     $core.String? id,
     $core.String? title,
-    $1.Timestamp? createdAt,
-    $1.Timestamp? updatedAt,
+    $2.Timestamp? createdAt,
+    $2.Timestamp? updatedAt,
   }) {
     final $result = create();
     if (id != null) {
@@ -725,8 +775,8 @@ class Conversation extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Conversation', package: const $pb.PackageName(_omitMessageNames ? '' : 'ai'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'title')
-    ..aOM<$1.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
-    ..aOM<$1.Timestamp>(4, _omitFieldNames ? '' : 'updatedAt', subBuilder: $1.Timestamp.create)
+    ..aOM<$2.Timestamp>(3, _omitFieldNames ? '' : 'createdAt', subBuilder: $2.Timestamp.create)
+    ..aOM<$2.Timestamp>(4, _omitFieldNames ? '' : 'updatedAt', subBuilder: $2.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -770,26 +820,26 @@ class Conversation extends $pb.GeneratedMessage {
   void clearTitle() => clearField(2);
 
   @$pb.TagNumber(3)
-  $1.Timestamp get createdAt => $_getN(2);
+  $2.Timestamp get createdAt => $_getN(2);
   @$pb.TagNumber(3)
-  set createdAt($1.Timestamp v) { setField(3, v); }
+  set createdAt($2.Timestamp v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasCreatedAt() => $_has(2);
   @$pb.TagNumber(3)
   void clearCreatedAt() => clearField(3);
   @$pb.TagNumber(3)
-  $1.Timestamp ensureCreatedAt() => $_ensure(2);
+  $2.Timestamp ensureCreatedAt() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $1.Timestamp get updatedAt => $_getN(3);
+  $2.Timestamp get updatedAt => $_getN(3);
   @$pb.TagNumber(4)
-  set updatedAt($1.Timestamp v) { setField(4, v); }
+  set updatedAt($2.Timestamp v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasUpdatedAt() => $_has(3);
   @$pb.TagNumber(4)
   void clearUpdatedAt() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Timestamp ensureUpdatedAt() => $_ensure(3);
+  $2.Timestamp ensureUpdatedAt() => $_ensure(3);
 }
 
 class Message extends $pb.GeneratedMessage {
@@ -797,8 +847,8 @@ class Message extends $pb.GeneratedMessage {
     $core.String? id,
     Role? role,
     $core.String? content,
-    $1.Timestamp? createdAt,
-    $1.Timestamp? updatedAt,
+    $2.Timestamp? createdAt,
+    $2.Timestamp? updatedAt,
   }) {
     final $result = create();
     if (id != null) {
@@ -826,8 +876,8 @@ class Message extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..e<Role>(2, _omitFieldNames ? '' : 'role', $pb.PbFieldType.OE, defaultOrMaker: Role.ROLE_UNSPECIFIED, valueOf: Role.valueOf, enumValues: Role.values)
     ..aOS(3, _omitFieldNames ? '' : 'content')
-    ..aOM<$1.Timestamp>(4, _omitFieldNames ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
-    ..aOM<$1.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $1.Timestamp.create)
+    ..aOM<$2.Timestamp>(4, _omitFieldNames ? '' : 'createdAt', subBuilder: $2.Timestamp.create)
+    ..aOM<$2.Timestamp>(5, _omitFieldNames ? '' : 'updatedAt', subBuilder: $2.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -880,26 +930,26 @@ class Message extends $pb.GeneratedMessage {
   void clearContent() => clearField(3);
 
   @$pb.TagNumber(4)
-  $1.Timestamp get createdAt => $_getN(3);
+  $2.Timestamp get createdAt => $_getN(3);
   @$pb.TagNumber(4)
-  set createdAt($1.Timestamp v) { setField(4, v); }
+  set createdAt($2.Timestamp v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasCreatedAt() => $_has(3);
   @$pb.TagNumber(4)
   void clearCreatedAt() => clearField(4);
   @$pb.TagNumber(4)
-  $1.Timestamp ensureCreatedAt() => $_ensure(3);
+  $2.Timestamp ensureCreatedAt() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $1.Timestamp get updatedAt => $_getN(4);
+  $2.Timestamp get updatedAt => $_getN(4);
   @$pb.TagNumber(5)
-  set updatedAt($1.Timestamp v) { setField(5, v); }
+  set updatedAt($2.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasUpdatedAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearUpdatedAt() => clearField(5);
   @$pb.TagNumber(5)
-  $1.Timestamp ensureUpdatedAt() => $_ensure(4);
+  $2.Timestamp ensureUpdatedAt() => $_ensure(4);
 }
 
 

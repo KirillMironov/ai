@@ -134,6 +134,18 @@ final $typed_data.Uint8List getConversationResponseDescriptor = $convert.base64D
     '52ZXJzYXRpb25SDGNvbnZlcnNhdGlvbhInCghtZXNzYWdlcxgCIAMoCzILLmFpLk1lc3NhZ2VS'
     'CG1lc3NhZ2Vz');
 
+@$core.Deprecated('Use deleteConversationRequestDescriptor instead')
+const DeleteConversationRequest$json = {
+  '1': 'DeleteConversationRequest',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+  ],
+};
+
+/// Descriptor for `DeleteConversationRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteConversationRequestDescriptor = $convert.base64Decode(
+    'ChlEZWxldGVDb252ZXJzYXRpb25SZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZA==');
+
 @$core.Deprecated('Use sendMessageRequestDescriptor instead')
 const SendMessageRequest$json = {
   '1': 'SendMessageRequest',

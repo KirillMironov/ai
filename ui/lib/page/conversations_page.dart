@@ -123,10 +123,40 @@ class _ConversationsPageState extends State<ConversationsPage> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2.0),
                           child: RoundedButton(
+                            padding: const EdgeInsets.all(10.0),
                             onTap: () => context.goRouteID(Routes.conversationByID, conversation.id),
-                            child: Text(
-                              conversation.title,
-                              overflow: TextOverflow.ellipsis,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    conversation.title,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 5.0),
+                                IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  iconSize: 17.0,
+                                  icon: const Icon(Icons.delete_outline_sharp),
+                                  onPressed: () => {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            const Text('Delete conversation?'),
+                                            TextButton(
+                                              onPressed: () => _deleteConversationByID(conversation.id),
+                                              child: const Text('Delete'),
+                                            )
+                                          ],
+                                        );
+                                      },
+                                    )
+                                  },
+                                )
+                              ],
                             ),
                           ),
                         );
@@ -241,6 +271,26 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
     if (!mounted) return;
     context.goRouteID(Routes.conversationByID, conversationID);
+  }
+
+  void _deleteConversationByID(String id) async {
+    try {
+      await widget.conversationsService.deleteConversationByID(id);
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      MaterialBannerDismiss(context, e.toString()).show();
+      return;
+    }
+
+    if (widget.conversationID != null && widget.conversationID == id) {
+      if (!mounted) return;
+      context.goRoute(Routes.conversations);
+    } else {
+      setState(() {});
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    }
   }
 
   Message _createMessage(Role role, String content) => Message('', role, content, DateTime.now(), DateTime.now());
