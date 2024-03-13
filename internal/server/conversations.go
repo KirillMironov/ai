@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	api "github.com/KirillMironov/ai/internal/api/ai"
@@ -16,6 +17,7 @@ import (
 type conversationsService interface {
 	ListConversations(ctx context.Context, token string, offset, limit int) ([]model.Conversation, error)
 	GetConversation(ctx context.Context, token string, id string) (model.Conversation, error)
+	DeleteConversation(ctx context.Context, token string, id string) error
 	SendMessage(ctx context.Context, request model.SendMessageRequest) (model.Message, error)
 	SendMessageStream(ctx context.Context, request model.SendMessageRequest, onChunk func(model.Message) error) error
 }
@@ -62,6 +64,20 @@ func (c Conversations) GetConversation(ctx context.Context, request *api.GetConv
 	}
 
 	return response, nil
+}
+
+func (c Conversations) DeleteConversation(ctx context.Context, request *api.DeleteConversationRequest) (*emptypb.Empty, error) {
+	token, err := c.tokenFromHeader(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = c.service.DeleteConversation(ctx, token, request.GetId()); err != nil {
+		slog.Error("failed to delete conversation", err)
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (c Conversations) SendMessage(ctx context.Context, request *api.SendMessageRequest) (*api.SendMessageResponse, error) {

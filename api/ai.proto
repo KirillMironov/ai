@@ -5,6 +5,7 @@ package ai;
 option go_package = "github.com/KirillMironov/ai/internal/api/ai;api";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 service Authenticator {
   rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
@@ -32,6 +33,7 @@ message SignInResponse {
 service Conversations {
   rpc ListConversations (ListConversationsRequest) returns (ListConversationsResponse) {}
   rpc GetConversation (GetConversationRequest) returns (GetConversationResponse) {}
+  rpc DeleteConversation (DeleteConversationRequest) returns (google.protobuf.Empty) {}
   rpc SendMessage (SendMessageRequest) returns (SendMessageResponse) {}
   rpc SendMessageStream (SendMessageStreamRequest) returns (stream SendMessageStreamResponse) {}
 }
@@ -52,6 +54,10 @@ message GetConversationRequest {
 message GetConversationResponse {
   Conversation conversation = 1;
   repeated Message messages = 2;
+}
+
+message DeleteConversationRequest {
+  string id = 1;
 }
 
 message SendMessageRequest {

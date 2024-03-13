@@ -85,6 +85,14 @@ jwt: {{jwt}}
   "id": "1"
 }
 
+### AI delete conversation
+GRPC {{ai_host}}/ai.Conversations/DeleteConversation
+jwt: {{jwt}}
+
+{
+  "id": "1"
+}
+
 ### AI send message
 GRPC {{ai_host}}/ai.Conversations/SendMessage
 jwt: {{jwt}}

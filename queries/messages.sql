@@ -9,3 +9,6 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- name: GetMessagesByConversationID :many
 SELECT id, role, content, created_at, updated_at FROM messages WHERE conversation_id = ? ORDER BY created_at;
+
+-- name: DeleteMessagesByConversationID :exec
+DELETE FROM messages WHERE conversation_id = ?;

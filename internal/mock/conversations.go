@@ -77,6 +77,9 @@ func (mock *AuthenticatorService) AuthenticateCalls() []struct {
 //
 //		// make and configure a mocked service.conversationsStorage
 //		mockedconversationsStorage := &ConversationsStorage{
+//			DeleteConversationFunc: func(ctx context.Context, id string) error {
+//				panic("mock out the DeleteConversation method")
+//			},
 //			GetConversationByIDFunc: func(ctx context.Context, id string) (model.Conversation, bool, error) {
 //				panic("mock out the GetConversationByID method")
 //			},
@@ -93,6 +96,9 @@ func (mock *AuthenticatorService) AuthenticateCalls() []struct {
 //
 //	}
 type ConversationsStorage struct {
+	// DeleteConversationFunc mocks the DeleteConversation method.
+	DeleteConversationFunc func(ctx context.Context, id string) error
+
 	// GetConversationByIDFunc mocks the GetConversationByID method.
 	GetConversationByIDFunc func(ctx context.Context, id string) (model.Conversation, bool, error)
 
@@ -104,6 +110,13 @@ type ConversationsStorage struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// DeleteConversation holds details about calls to the DeleteConversation method.
+		DeleteConversation []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ID is the id argument value.
+			ID string
+		}
 		// GetConversationByID holds details about calls to the GetConversationByID method.
 		GetConversationByID []struct {
 			// Ctx is the ctx argument value.
@@ -130,9 +143,46 @@ type ConversationsStorage struct {
 			Conversation model.Conversation
 		}
 	}
+	lockDeleteConversation       sync.RWMutex
 	lockGetConversationByID      sync.RWMutex
 	lockGetConversationsByUserID sync.RWMutex
 	lockSaveConversation         sync.RWMutex
+}
+
+// DeleteConversation calls DeleteConversationFunc.
+func (mock *ConversationsStorage) DeleteConversation(ctx context.Context, id string) error {
+	if mock.DeleteConversationFunc == nil {
+		panic("ConversationsStorage.DeleteConversationFunc: method is nil but conversationsStorage.DeleteConversation was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		ID  string
+	}{
+		Ctx: ctx,
+		ID:  id,
+	}
+	mock.lockDeleteConversation.Lock()
+	mock.calls.DeleteConversation = append(mock.calls.DeleteConversation, callInfo)
+	mock.lockDeleteConversation.Unlock()
+	return mock.DeleteConversationFunc(ctx, id)
+}
+
+// DeleteConversationCalls gets all the calls that were made to DeleteConversation.
+// Check the length with:
+//
+//	len(mockedconversationsStorage.DeleteConversationCalls())
+func (mock *ConversationsStorage) DeleteConversationCalls() []struct {
+	Ctx context.Context
+	ID  string
+} {
+	var calls []struct {
+		Ctx context.Context
+		ID  string
+	}
+	mock.lockDeleteConversation.RLock()
+	calls = mock.calls.DeleteConversation
+	mock.lockDeleteConversation.RUnlock()
+	return calls
 }
 
 // GetConversationByID calls GetConversationByIDFunc.

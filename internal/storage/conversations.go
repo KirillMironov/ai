@@ -122,3 +122,23 @@ func (c Conversations) GetConversationByID(ctx context.Context, id string) (conv
 
 	return conversation, true, nil
 }
+
+func (c Conversations) DeleteConversation(ctx context.Context, id string) error {
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	qtx := queries.New(tx)
+
+	if err = qtx.DeleteMessagesByConversationID(ctx, id); err != nil {
+		return err
+	}
+
+	if err = qtx.DeleteConversationByID(ctx, id); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}

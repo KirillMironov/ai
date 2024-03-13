@@ -15,3 +15,6 @@ LIMIT ? OFFSET ?;
 
 -- name: GetConversationByID :one
 SELECT id, user_id, title, created_at, updated_at FROM conversations WHERE id = ?;
+
+-- name: DeleteConversationByID :exec
+DELETE FROM conversations WHERE id = ?;

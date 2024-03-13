@@ -24,6 +24,7 @@ type (
 		SaveConversation(ctx context.Context, conversation model.Conversation) error
 		GetConversationsByUserID(ctx context.Context, userID string, offset, limit int) ([]model.Conversation, error)
 		GetConversationByID(ctx context.Context, id string) (conversation model.Conversation, exists bool, err error)
+		DeleteConversation(ctx context.Context, id string) error
 	}
 )
 
@@ -76,6 +77,18 @@ func (c Conversations) GetConversation(ctx context.Context, token string, id str
 	}
 
 	return conversation, nil
+}
+
+func (c Conversations) DeleteConversation(ctx context.Context, token string, id string) error {
+	if _, err := c.GetConversation(ctx, token, id); err != nil {
+		return err
+	}
+
+	if err := c.conversationsStorage.DeleteConversation(ctx, id); err != nil {
+		return fmt.Errorf("delete conversation with id '%s': %w", id, err)
+	}
+
+	return nil
 }
 
 func (c Conversations) SendMessage(ctx context.Context, request model.SendMessageRequest) (model.Message, error) {

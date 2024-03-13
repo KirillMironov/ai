@@ -10,6 +10,15 @@ import (
 	"time"
 )
 
+const deleteConversationByID = `-- name: DeleteConversationByID :exec
+DELETE FROM conversations WHERE id = ?
+`
+
+func (q *Queries) DeleteConversationByID(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteConversationByID, id)
+	return err
+}
+
 const getConversationByID = `-- name: GetConversationByID :one
 SELECT id, user_id, title, created_at, updated_at FROM conversations WHERE id = ?
 `

@@ -239,6 +239,98 @@ func TestConversations_GetConversation(t *testing.T) {
 	}
 }
 
+func TestConversations_DeleteConversation(t *testing.T) {
+	const (
+		testConversationID = "conversation_id"
+		testToken          = "token"
+		testUserID         = "user_id"
+		testUsername       = "username"
+	)
+
+	tests := []struct {
+		name           string
+		token          string
+		conversationID string
+		wantErr        bool
+		mocks          conversationsMocks
+	}{
+		{
+			name:           "success",
+			token:          testToken,
+			conversationID: testConversationID,
+			wantErr:        false,
+			mocks: conversationsMocks{
+				authenticatorService: &mock.AuthenticatorService{
+					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
+						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
+					},
+				},
+				conversationsStorage: &mock.ConversationsStorage{
+					GetConversationByIDFunc: func(_ context.Context, _ string) (model.Conversation, bool, error) {
+						return model.Conversation{ID: testConversationID, UserID: testUserID}, true, nil
+					},
+					DeleteConversationFunc: func(_ context.Context, _ string) error {
+						return nil
+					},
+				},
+				llmClient: nil,
+			},
+		},
+		{
+			name:           "get conversation error",
+			token:          testToken,
+			conversationID: testConversationID,
+			wantErr:        true,
+			mocks: conversationsMocks{
+				authenticatorService: &mock.AuthenticatorService{
+					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
+						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
+					},
+				},
+				conversationsStorage: &mock.ConversationsStorage{
+					GetConversationByIDFunc: func(_ context.Context, _ string) (model.Conversation, bool, error) {
+						return model.Conversation{}, false, errStorage
+					},
+				},
+				llmClient: nil,
+			},
+		},
+		{
+			name:           "storage error",
+			token:          testToken,
+			conversationID: testConversationID,
+			wantErr:        true,
+			mocks: conversationsMocks{
+				authenticatorService: &mock.AuthenticatorService{
+					AuthenticateFunc: func(_ string) (model.TokenPayload, error) {
+						return model.TokenPayload{UserID: testUserID, Username: testUsername}, nil
+					},
+				},
+				conversationsStorage: &mock.ConversationsStorage{
+					GetConversationByIDFunc: func(_ context.Context, _ string) (model.Conversation, bool, error) {
+						return model.Conversation{ID: testConversationID, UserID: testUserID}, true, nil
+					},
+					DeleteConversationFunc: func(_ context.Context, _ string) error {
+						return errStorage
+					},
+				},
+				llmClient: nil,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			conversationsService := NewConversations(tc.mocks.authenticatorService, tc.mocks.conversationsStorage, tc.mocks.llmClient)
+
+			err := conversationsService.DeleteConversation(context.Background(), tc.token, tc.conversationID)
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("conversationsService.DeleteConversation() = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestConversations_SendMessage(t *testing.T) {
 	const (
 		testContent        = "content"
