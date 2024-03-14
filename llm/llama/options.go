@@ -37,3 +37,9 @@ func WithMmap(mmap bool) Option {
 		llama.mmap = mmap
 	}
 }
+
+func WithCacheChatPrompt(cacheChatPrompt bool) Option {
+	return func(llama *Llama) {
+		llama.cacheChatPrompt = cacheChatPrompt
+	}
+}

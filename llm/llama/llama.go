@@ -17,11 +17,12 @@ import (
 )
 
 const (
-	defaultServerHost  = "0.0.0.0"
-	defaultServerPort  = 8080
-	defaultContextSize = 2048
-	defaultNumSlots    = 1
-	defaultNumThreads  = 4
+	defaultServerHost      = "0.0.0.0"
+	defaultServerPort      = 8080
+	defaultContextSize     = 2048
+	defaultNumSlots        = 1
+	defaultNumThreads      = 4
+	defaultCacheChatPrompt = true
 )
 
 var _ llm.LLM = &Llama{}
@@ -32,23 +33,25 @@ type Llama struct {
 	cancel         context.CancelFunc
 	once           sync.Once
 
-	serverHost  string // llama server host
-	serverPort  int    // llama server port
-	contextSize int    // prompt context size
-	numSlots    int    // number of slot to process requests
-	numThreads  int    // number of threads to use during generation
-	mmap        bool   // memory-map the model to load only necessary parts of it as needed
+	serverHost      string // llama server host
+	serverPort      int    // llama server port
+	contextSize     int    // prompt context size
+	numSlots        int    // number of slot to process requests
+	numThreads      int    // number of threads to use during generation
+	mmap            bool   // memory-map the model to load only necessary parts of it as needed
+	cacheChatPrompt bool   // compare the prompt with the previous chat completion and evaluate only the "unseen" suffix
 }
 
 func New(executablePath, modelPath string, options ...Option) *Llama {
 	llama := &Llama{
-		executablePath: executablePath,
-		modelPath:      modelPath,
-		serverHost:     defaultServerHost,
-		serverPort:     defaultServerPort,
-		contextSize:    defaultContextSize,
-		numSlots:       defaultNumSlots,
-		numThreads:     max(runtime.NumCPU(), defaultNumThreads),
+		executablePath:  executablePath,
+		modelPath:       modelPath,
+		serverHost:      defaultServerHost,
+		serverPort:      defaultServerPort,
+		contextSize:     defaultContextSize,
+		numSlots:        defaultNumSlots,
+		numThreads:      max(runtime.NumCPU(), defaultNumThreads),
+		cacheChatPrompt: defaultCacheChatPrompt,
 	}
 	for _, option := range options {
 		option(llama)
@@ -99,7 +102,7 @@ func (l *Llama) CompletionStream(ctx context.Context, request llm.CompletionRequ
 }
 
 func (l *Llama) ChatCompletion(ctx context.Context, request llm.ChatCompletionRequest) (llm.ChatCompletionResponse, error) {
-	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages)}
+	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages), CachePrompt: l.cacheChatPrompt}
 
 	resp, err := httputil.Post[chatCompletionResponse](ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
 	if err != nil {
@@ -114,7 +117,11 @@ func (l *Llama) ChatCompletion(ctx context.Context, request llm.ChatCompletionRe
 }
 
 func (l *Llama) ChatCompletionStream(ctx context.Context, request llm.ChatCompletionRequest, onChunk func(llm.ChatCompletionResponse) error) error {
-	req := chatCompletionRequest{Messages: messagesToLlamaMessages(request.Messages), Stream: true}
+	req := chatCompletionRequest{
+		Messages:    messagesToLlamaMessages(request.Messages),
+		Stream:      true,
+		CachePrompt: l.cacheChatPrompt,
+	}
 
 	body, err := httputil.PostBody(ctx, l.serverURL("/v1/chat/completions"), http.StatusOK, req)
 	if err != nil {

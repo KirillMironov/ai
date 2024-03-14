@@ -24,8 +24,9 @@ type (
 
 type (
 	chatCompletionRequest struct {
-		Messages []message `json:"messages"`
-		Stream   bool      `json:"stream,omitempty"`
+		Messages    []message `json:"messages"`
+		Stream      bool      `json:"stream,omitempty"`
+		CachePrompt bool      `json:"cache_prompt,omitempty"`
 	}
 
 	chatCompletionResponse struct {
