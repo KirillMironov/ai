@@ -26,6 +26,7 @@ const (
 	defaultNumThreads      = 4
 	defaultCacheChatPrompt = true
 	defaultSystemPrompt    = "Below are a series of dialogues between various people and an AI assistant. The AI tries to be helpful, polite, honest, sophisticated, emotionally aware, and humble-but-knowledgeable. The assistant is happy to help with almost anything, and will do its best to understand exactly what is needed. It also tries to avoid giving false or misleading information, and it caveats when it isn't entirely sure about the right answer. That said, the assistant is practical and really does its best, and doesn't let caution get too much in the way of being useful." //nolint:lll
+	defaultChatTemplate    = "llama2"
 )
 
 var _ llm.LLM = &Llama{}
@@ -44,6 +45,7 @@ type Llama struct {
 	mmap            bool   // memory-map the model to load only necessary parts of it as needed
 	cacheChatPrompt bool   // compare the prompt with the previous chat completion and evaluate only the "unseen" suffix
 	systemPrompt    string // initial prompt of all slots
+	chatTemplate    string // custom jinja chat template
 }
 
 func New(executablePath, modelPath string, options ...Option) *Llama {
@@ -57,6 +59,7 @@ func New(executablePath, modelPath string, options ...Option) *Llama {
 		numThreads:      max(runtime.NumCPU(), defaultNumThreads),
 		cacheChatPrompt: defaultCacheChatPrompt,
 		systemPrompt:    defaultSystemPrompt,
+		chatTemplate:    defaultChatTemplate,
 	}
 	for _, option := range options {
 		option(llama)
@@ -193,6 +196,7 @@ func (l *Llama) Start(ctx context.Context) error {
 			"--threads", strconv.Itoa(l.numThreads),
 			"--parallel", strconv.Itoa(l.numSlots),
 			"--system-prompt-file", systemPromptFile.Name(),
+			"--chat-template", l.chatTemplate,
 		}
 
 		if !l.mmap {

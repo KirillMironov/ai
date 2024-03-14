@@ -49,3 +49,9 @@ func WithSystemPrompt(systemPrompt string) Option {
 		llama.systemPrompt = systemPrompt
 	}
 }
+
+func WithChatTemplate(chatTemplate string) Option {
+	return func(llama *Llama) {
+		llama.chatTemplate = chatTemplate
+	}
+}
