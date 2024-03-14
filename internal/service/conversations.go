@@ -150,8 +150,11 @@ func (c Conversations) SendMessageStream(ctx context.Context, request model.Send
 
 	for {
 		response, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			break
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return err
 		}
 		content := response.GetMessage().GetContent()
 		message.Content += content

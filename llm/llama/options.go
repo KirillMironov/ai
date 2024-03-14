@@ -43,3 +43,9 @@ func WithCacheChatPrompt(cacheChatPrompt bool) Option {
 		llama.cacheChatPrompt = cacheChatPrompt
 	}
 }
+
+func WithSystemPrompt(systemPrompt string) Option {
+	return func(llama *Llama) {
+		llama.systemPrompt = systemPrompt
+	}
+}
