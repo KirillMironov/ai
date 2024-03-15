@@ -39,6 +39,20 @@ services:
     networks:
       ai:
 
+  ui:
+    container_name: ui
+    build:
+      dockerfile: ./Dockerfile.ui
+      args:
+        AI_HOST: localhost
+        AI_PORT: 8080
+        AI_WEB_PORT: 9090
+        AI_SECURE: false
+    ports:
+      - "8090:80"
+    networks:
+      ai:
+
 volumes:
   ai_data:
 
