@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,7 +15,9 @@ import (
 	"github.com/KirillMironov/ai/internal/model"
 )
 
-const titleLength = 10
+const maxTitleLength = 30
+
+var sentenceRegex = regexp.MustCompile(`([^.!?]+[.!?])`)
 
 type (
 	authenticatorService interface {
@@ -186,13 +190,11 @@ func (c Conversations) authenticate(token string) (userID string, err error) {
 
 func (c Conversations) getOrCreateConversation(ctx context.Context, userID, conversationID, content string) (conversation model.Conversation, err error) {
 	if conversationID == "" {
-		contentRunes := []rune(content)
-		title := string(contentRunes[:min(titleLength, len(contentRunes))])
 		now := time.Now()
 		conversation = model.Conversation{
 			ID:        uuid.NewString(),
 			UserID:    userID,
-			Title:     title,
+			Title:     titleFromContent(content),
 			CreatedAt: now,
 			UpdatedAt: now,
 		}
@@ -210,6 +212,16 @@ func (c Conversations) getOrCreateConversation(ctx context.Context, userID, conv
 	}
 
 	return conversation, nil
+}
+
+func titleFromContent(content string) string {
+	if matches := sentenceRegex.FindAllString(content, 1); len(matches) > 0 {
+		content = matches[0]
+	}
+	if len(content) > maxTitleLength {
+		return strings.TrimSpace(content[:maxTitleLength])
+	}
+	return strings.TrimSpace(content)
 }
 
 func newMessage(role model.Role, content string) model.Message {
