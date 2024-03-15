@@ -218,10 +218,11 @@ func titleFromContent(content string) string {
 	if matches := sentenceRegex.FindAllString(content, 1); len(matches) > 0 {
 		content = matches[0]
 	}
-	if len(content) > maxTitleLength {
-		return strings.TrimSpace(content[:maxTitleLength])
+	runes := []rune(content)
+	if len(runes) > maxTitleLength {
+		return strings.TrimSpace(string(runes[:maxTitleLength]))
 	}
-	return strings.TrimSpace(content)
+	return strings.TrimSpace(string(runes))
 }
 
 func newMessage(role model.Role, content string) model.Message {
