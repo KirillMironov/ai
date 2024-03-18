@@ -7,11 +7,13 @@ services:
     container_name: llm
     build:
       dockerfile: ./Dockerfile.llm
+      args:
+        MODEL_URL: https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf?download=true
     ports:
       - "8081:8081"
     environment:
       - LLAMA_EXECUTABLE_PATH=/bin/llama/server
-      - LLAMA_MODEL_PATH=/models/llama-2-7b-chat.Q4_K_M.gguf
+      - LLAMA_MODEL_PATH=/models/model
     networks:
       ai:
 

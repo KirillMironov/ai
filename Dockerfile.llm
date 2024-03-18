@@ -12,8 +12,9 @@ COPY . .
 RUN go build -o /bin/llm ./cmd/llm
 
 FROM ubuntu:24.04
+ARG MODEL_URL
 RUN apt-get update && apt-get install wget htop -y && mkdir /models
-RUN wget -O /models/llama-2-7b-chat.Q4_K_M.gguf https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf?download=true
+RUN wget -O /models/model $MODEL_URL
 COPY --from=llama-builder /llama/server /bin/llama/server
 COPY --from=llm-builder /bin/llm /bin/llm
 ENTRYPOINT ["/bin/llm"]
