@@ -56,7 +56,7 @@ class Router {
         redirect: (context, state) {
           try {
             final token = tokenStorage.getToken();
-            return token == null || JwtDecoder.isExpired(token)
+            return token == null || JwtDecoder.isExpired(token.jwt)
                 ? Routes.login.path
                 : state.matchedLocation == Routes.login.path
                     ? Routes.conversations.path

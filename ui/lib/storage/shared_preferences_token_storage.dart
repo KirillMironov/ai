@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:ai/model/token.dart';
 import 'package:ai/storage/token_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesTokenStorage implements TokenStorage {
+  final _tokenKey = 'token';
+
   late SharedPreferences _prefs;
-  final _jwtKey = 'jwt';
 
   SharedPreferencesTokenStorage() {
     _initPrefs();
@@ -15,12 +18,14 @@ class SharedPreferencesTokenStorage implements TokenStorage {
   }
 
   @override
-  void saveToken(String token) async {
-    await _prefs.setString(_jwtKey, token);
+  void saveToken(Token token) async {
+    final json = jsonEncode(token);
+    await _prefs.setString(_tokenKey, json);
   }
 
   @override
-  String? getToken() {
-    return _prefs.getString(_jwtKey);
+  Token? getToken() {
+    final json = _prefs.getString(_tokenKey);
+    return json != null ? Token.fromJson(jsonDecode(json)) : null;
   }
 }

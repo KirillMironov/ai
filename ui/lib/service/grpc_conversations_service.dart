@@ -142,7 +142,7 @@ final class GrpcConversationsService extends GrpcService implements Conversation
     final token = tokenStorage.getToken();
     return token == null
         ? throw Exception('jwt token not found in token storage')
-        : CallOptions(metadata: {'jwt': token});
+        : CallOptions(metadata: {'jwt': token.jwt});
   }
 }
 

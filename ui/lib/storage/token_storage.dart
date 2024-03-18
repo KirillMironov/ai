@@ -1,4 +1,6 @@
+import 'package:ai/model/token.dart';
+
 abstract interface class TokenStorage {
-  void saveToken(String token);
-  String? getToken();
+  void saveToken(Token token);
+  Token? getToken();
 }

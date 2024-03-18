@@ -1,3 +1,4 @@
+import 'package:ai/model/token.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/storage/token_storage.dart';
@@ -98,7 +99,7 @@ class LoginPage extends StatelessWidget {
 
     try {
       final token = await loginAction(_usernameController.text, _passwordController.text);
-      tokenStorage.saveToken(token);
+      tokenStorage.saveToken(Token.fromJWT(token));
     } catch (e) {
       if (!context.mounted) return;
       MaterialBannerDismiss(context, e.toString()).show();
