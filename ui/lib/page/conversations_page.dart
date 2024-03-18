@@ -3,6 +3,7 @@ import 'package:ai/model/message.dart';
 import 'package:ai/model/role.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
+import 'package:ai/storage/user_storage.dart';
 import 'package:ai/widget/custom_future_builder.dart';
 import 'package:ai/widget/custom_scroll_controller.dart';
 import 'package:ai/widget/material_banned_dismiss.dart';
@@ -12,11 +13,13 @@ import 'package:flutter/material.dart';
 
 class ConversationsPage extends StatefulWidget {
   final ConversationsService conversationsService;
+  final UserStorage userStorage;
   final String? conversationID;
 
   const ConversationsPage({
     super.key,
     required this.conversationsService,
+    required this.userStorage,
     this.conversationID,
   });
 
@@ -30,14 +33,24 @@ class _ConversationsPageState extends State<ConversationsPage> {
   final _messageInputController = TextEditingController();
 
   late Future<List<Message>> _messagesFuture;
+
   List<Message> _messages = List.empty(growable: true);
   bool _isSendButtonEnabled = true;
+  String _username = '';
 
   @override
   void initState() {
     if (widget.conversationID != null) {
       _messagesFuture = widget.conversationsService.getMessagesByConversationID(widget.conversationID!);
     }
+
+    try {
+      final user = widget.userStorage.getUser();
+      if (user != null) {
+        _username = user.username;
+      }
+    } catch(_) {}
+
     super.initState();
   }
 
@@ -172,17 +185,17 @@ class _ConversationsPageState extends State<ConversationsPage> {
           child: RoundedButton(
             onTap: () {},
             color: _buttonColor,
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    'John Doe',
-                    style: TextStyle(color: Colors.white),
+                    _username,
+                    style: const TextStyle(color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.person,
                   color: Colors.white,
                 ),

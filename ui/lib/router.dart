@@ -37,7 +37,10 @@ class Router {
         routes: [
           Route(
             route: Routes.conversations,
-            childBuilder: (state) => ConversationsPage(conversationsService: conversationsService),
+            childBuilder: (state) => ConversationsPage(
+              conversationsService: conversationsService,
+              userStorage: userStorage,
+            ),
           ),
           Route(
             route: Routes.login,
@@ -48,6 +51,7 @@ class Router {
             childBuilder: (state) {
               return ConversationsPage(
                 conversationsService: conversationsService,
+                userStorage: userStorage,
                 conversationID: state.pathParameterID(),
               );
             },
