@@ -1,19 +1,19 @@
-import 'package:ai/model/token.dart';
+import 'package:ai/model/user.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/authenticator_service.dart';
-import 'package:ai/storage/token_storage.dart';
+import 'package:ai/storage/user_storage.dart';
 import 'package:ai/widget/material_banned_dismiss.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
   final AuthenticatorService authenticatorService;
-  final TokenStorage tokenStorage;
+  final UserStorage userStorage;
 
   LoginPage({
     super.key,
     required this.authenticatorService,
-    required this.tokenStorage,
+    required this.userStorage,
   });
 
   final _formKey = GlobalKey<FormState>();
@@ -99,7 +99,7 @@ class LoginPage extends StatelessWidget {
 
     try {
       final token = await loginAction(_usernameController.text, _passwordController.text);
-      tokenStorage.saveToken(Token.fromJWT(token));
+      userStorage.saveUser(User.fromJWT(token));
     } catch (e) {
       if (!context.mounted) return;
       MaterialBannerDismiss(context, e.toString()).show();

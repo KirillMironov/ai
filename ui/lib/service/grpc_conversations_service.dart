@@ -5,13 +5,13 @@ import 'package:ai/model/role.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/service/grpc_service.dart';
 import 'package:ai/api/ai.pbgrpc.dart' as api;
-import 'package:ai/storage/token_storage.dart';
+import 'package:ai/storage/user_storage.dart';
 import 'package:grpc/grpc.dart';
 
 final class GrpcConversationsService extends GrpcService implements ConversationsService {
-  final TokenStorage tokenStorage;
+  final UserStorage userStorage;
 
-  GrpcConversationsService(super.host, super.port, super.webPort, super.secure, this.tokenStorage);
+  GrpcConversationsService(super.host, super.port, super.webPort, super.secure, this.userStorage);
 
   @override
   Future<List<ConversationDescription>> listConversations(int offset, int limit) async {
@@ -139,10 +139,8 @@ final class GrpcConversationsService extends GrpcService implements Conversation
   }
 
   CallOptions _callOptionsMetadataJWT() {
-    final token = tokenStorage.getToken();
-    return token == null
-        ? throw Exception('jwt token not found in token storage')
-        : CallOptions(metadata: {'jwt': token.jwt});
+    final user = userStorage.getUser();
+    return user == null ? throw Exception('user not found in user storage') : CallOptions(metadata: {'jwt': user.jwt});
   }
 }
 

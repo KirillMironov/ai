@@ -1,7 +1,7 @@
 import 'package:ai/router.dart';
 import 'package:ai/service/grpc_authenticator_service.dart';
 import 'package:ai/service/grpc_conversations_service.dart';
-import 'package:ai/storage/shared_preferences_token_storage.dart';
+import 'package:ai/storage/shared_preferences_user_storage.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:go_router/go_router.dart';
 
@@ -18,10 +18,10 @@ void main() {
   setUrlStrategy();
 
   // di
-  final tokenStorage = SharedPreferencesTokenStorage();
+  final userStorage = SharedPreferencesUserStorage();
   final authenticatorService = GrpcAuthenticatorService(aiHost, aiPort, aiWebPort, aiSecure);
-  final conversationsService = GrpcConversationsService(aiHost, aiPort, aiWebPort, aiSecure, tokenStorage);
-  final router = Router(tokenStorage, authenticatorService, conversationsService);
+  final conversationsService = GrpcConversationsService(aiHost, aiPort, aiWebPort, aiSecure, userStorage);
+  final router = Router(userStorage, authenticatorService, conversationsService);
 
   runApp(App(router: router.router()));
 }

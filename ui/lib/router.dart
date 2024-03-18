@@ -2,7 +2,7 @@ import 'package:ai/page/conversations_page.dart';
 import 'package:ai/page/login_page.dart';
 import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/service/conversations_service.dart';
-import 'package:ai/storage/token_storage.dart';
+import 'package:ai/storage/user_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -27,11 +27,11 @@ enum Routes {
 }
 
 class Router {
-  final TokenStorage tokenStorage;
+  final UserStorage userStorage;
   final AuthenticatorService authenticatorService;
   final ConversationsService conversationsService;
 
-  Router(this.tokenStorage, this.authenticatorService, this.conversationsService);
+  Router(this.userStorage, this.authenticatorService, this.conversationsService);
 
   GoRouter router() => GoRouter(
         routes: [
@@ -41,7 +41,7 @@ class Router {
           ),
           Route(
             route: Routes.login,
-            childBuilder: (state) => LoginPage(authenticatorService: authenticatorService, tokenStorage: tokenStorage),
+            childBuilder: (state) => LoginPage(authenticatorService: authenticatorService, userStorage: userStorage),
           ),
           Route(
             route: Routes.conversationByID,
@@ -55,8 +55,8 @@ class Router {
         ],
         redirect: (context, state) {
           try {
-            final token = tokenStorage.getToken();
-            return token == null || JwtDecoder.isExpired(token.jwt)
+            final user = userStorage.getUser();
+            return user == null || JwtDecoder.isExpired(user.jwt)
                 ? Routes.login.path
                 : state.matchedLocation == Routes.login.path
                     ? Routes.conversations.path
