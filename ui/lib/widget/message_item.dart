@@ -1,4 +1,5 @@
 import 'package:ai/model/role.dart';
+import 'package:ai/widget/highlighted_markdown.dart';
 import 'package:flutter/material.dart';
 
 class MessageItem extends StatelessWidget {
@@ -45,15 +46,7 @@ class MessageItem extends StatelessWidget {
           const SizedBox(height: 4.0),
           Padding(
             padding: const EdgeInsets.only(left: 48.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SelectableText(
-                  content,
-                  textAlign: TextAlign.left,
-                ),
-              ],
-            ),
+            child: HighlightedMarkdown(content)
           ),
         ],
       ),
