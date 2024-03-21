@@ -98,13 +98,13 @@ import 'package:highlight/languages/x86asm.dart';
 import 'package:highlight/languages/xml.dart';
 import 'package:highlight/languages/yaml.dart';
 
-class HighlightedCode extends StatelessWidget {
+class CodeBlock extends StatelessWidget {
   final String code;
   final EdgeInsetsGeometry? padding;
   final TextStyle textStyle;
   final Map<String, TextStyle> theme;
 
-  HighlightedCode({
+  CodeBlock({
     super.key,
     required this.code,
     this.padding,
@@ -113,23 +113,42 @@ class HighlightedCode extends StatelessWidget {
   })  : textStyle = textStyle ?? GoogleFonts.jetBrainsMono(),
         theme = theme ?? tomorrowNightTheme;
 
+  final highlight = Highlight()..registerLanguages(highlightedLanguages);
+
   @override
   Widget build(BuildContext context) {
-    final highlight = Highlight()..registerLanguages(highlightedLanguages);
+    final scrollController = ScrollController();
 
-    return Container(
-      color: theme['root']?.backgroundColor ?? const Color(0xffffffff),
-      padding: padding,
-      child: SelectableText.rich(
-        TextSpan(
-          style: textStyle,
-          children: _convert(highlight.parse(code, autoDetection: true).nodes!),
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          controller: scrollController,
+          trackVisibility: true,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Container(
+                color: theme['root']?.backgroundColor ?? const Color(0xffffffff),
+                padding: padding,
+                child: Text.rich(
+                  TextSpan(
+                    style: textStyle,
+                    children: _codeToSpans(code),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  List<TextSpan> _convert(List<Node> nodes) {
+  List<TextSpan> _codeToSpans(String code) {
+    final nodes = highlight.parse(code, autoDetection: true).nodes!;
+
     List<TextSpan> spans = [];
     List<List<TextSpan>> stack = [];
 
@@ -162,7 +181,7 @@ class HighlightedCode extends StatelessWidget {
     return spans;
   }
 
-  final highlightedLanguages = {
+  static final highlightedLanguages = {
     '1c': lang1C,
     'ada': ada,
     'arduino': arduino,
