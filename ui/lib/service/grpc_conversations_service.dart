@@ -11,7 +11,7 @@ import 'package:grpc/grpc.dart';
 final class GrpcConversationsService extends GrpcService implements ConversationsService {
   final UserStorage userStorage;
 
-  GrpcConversationsService(super.host, super.port, super.webPort, super.secure, this.userStorage);
+  GrpcConversationsService(super.host, super.webHost, super.port, super.webPort, super.secure, this.userStorage);
 
   @override
   Future<List<ConversationDescription>> listConversations(int offset, int limit) async {

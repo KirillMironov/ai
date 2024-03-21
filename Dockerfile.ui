@@ -1,6 +1,7 @@
 FROM ubuntu:24.04 as builder
 
 ARG AI_HOST
+ARG AI_WEB_HOST
 ARG AI_PORT
 ARG AI_WEB_PORT
 ARG AI_SECURE
@@ -21,6 +22,7 @@ RUN flutter clean
 RUN flutter pub get
 RUN flutter build web --release \
     --dart-define AI_HOST=$AI_HOST \
+    --dart-define AI_WEB_HOST=$AI_WEB_HOST \
     --dart-define AI_PORT=$AI_PORT \
     --dart-define AI_WEB_PORT=$AI_WEB_PORT \
     --dart-define AI_SECURE=$AI_SECURE

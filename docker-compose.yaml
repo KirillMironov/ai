@@ -47,6 +47,7 @@ services:
       dockerfile: ./Dockerfile.ui
       args:
         AI_HOST: localhost
+        AI_WEB_HOST: localhost
         AI_PORT: 8080
         AI_WEB_PORT: 9090
         AI_SECURE: false
