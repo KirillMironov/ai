@@ -4,6 +4,7 @@ import 'package:ai/model/role.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/user_storage.dart';
+import 'package:ai/widget/custom_alert_dialog.dart';
 import 'package:ai/widget/custom_future_builder.dart';
 import 'package:ai/widget/material_banned_dismiss.dart';
 import 'package:ai/widget/message_item.dart';
@@ -156,15 +157,9 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                     showDialog(
                                       context: context,
                                       builder: (context) {
-                                        return Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Text('Delete conversation?'),
-                                            TextButton(
-                                              onPressed: () => _deleteConversationByID(conversation.id),
-                                              child: const Text('Delete'),
-                                            )
-                                          ],
+                                        return CustomAlertDialog(
+                                          title: 'Delete conversation?',
+                                          onContinue: () => _deleteConversationByID(conversation.id),
                                         );
                                       },
                                     )
@@ -195,9 +190,26 @@ class _ConversationsPageState extends State<ConversationsPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(
-                  Icons.person,
-                  color: Colors.white,
+                InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return CustomAlertDialog(
+                          title: 'Logout?',
+                          onContinue: () {
+                            widget.userStorage.deleteUser();
+                            context.goRoute(Routes.login);
+                          },
+                        );
+                      },
+                    )
+                  },
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),

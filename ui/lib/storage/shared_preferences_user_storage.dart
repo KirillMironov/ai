@@ -24,6 +24,11 @@ class SharedPreferencesUserStorage implements UserStorage {
   }
 
   @override
+  void deleteUser() async {
+    await _prefs.remove(_tokenKey);
+  }
+
+  @override
   User? getUser() {
     final json = _prefs.getString(_tokenKey);
     return json != null ? User.fromJson(jsonDecode(json)) : null;
