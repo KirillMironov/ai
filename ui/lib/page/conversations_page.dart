@@ -5,11 +5,11 @@ import 'package:ai/router.dart';
 import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/user_storage.dart';
 import 'package:ai/widget/custom_future_builder.dart';
-import 'package:ai/widget/custom_scroll_controller.dart';
 import 'package:ai/widget/material_banned_dismiss.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class ConversationsPage extends StatefulWidget {
   final ConversationsService conversationsService;
@@ -29,7 +29,7 @@ class ConversationsPage extends StatefulWidget {
 
 class _ConversationsPageState extends State<ConversationsPage> {
   final _buttonColor = const Color.fromRGBO(31, 31, 31, 1.0);
-  final _messagesScrollController = CustomScrollController();
+  final _messagesScrollController = ScrollController();
   final _messageInputController = TextEditingController();
 
   late Future<List<Message>> _messagesFuture;
@@ -49,7 +49,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
       if (user != null) {
         _username = user.username;
       }
-    } catch(_) {}
+    } catch (_) {}
 
     super.initState();
   }
@@ -265,15 +265,27 @@ class _ConversationsPageState extends State<ConversationsPage> {
       _messages.add(_createMessage(Role.assistant, ''));
       _messagesFuture = Future(() => _messages);
       _messageInputController.clear();
-      _messagesScrollController.scrollDown();
+    });
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _messagesScrollController.jumpTo(
+        _messagesScrollController.position.maxScrollExtent,
+      );
     });
 
     try {
       await widget.conversationsService.sendMessageStream(widget.conversationID ?? '', content).forEach((e) {
+        final autoscroll = _messagesScrollController.offset >= _messagesScrollController.position.maxScrollExtent;
         setState(() {
           _messages.last.content += e.content;
-          _messagesScrollController.scrollDown();
         });
+        if (autoscroll) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _messagesScrollController.jumpTo(
+              _messagesScrollController.position.maxScrollExtent,
+            );
+          });
+        }
       });
     } catch (e) {
       if (!mounted) return;
