@@ -280,6 +280,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
     });
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_messagesScrollController.positions.isEmpty) return;
       _messagesScrollController.jumpTo(
         _messagesScrollController.position.maxScrollExtent,
       );
@@ -293,6 +294,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
         });
         if (autoscroll) {
           SchedulerBinding.instance.addPostFrameCallback((_) {
+            if (_messagesScrollController.positions.isEmpty) return;
             _messagesScrollController.jumpTo(
               _messagesScrollController.position.maxScrollExtent,
             );
