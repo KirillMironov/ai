@@ -2,7 +2,7 @@ import 'package:ai/model/user.dart';
 import 'package:ai/router.dart';
 import 'package:ai/service/authenticator_service.dart';
 import 'package:ai/storage/user_storage.dart';
-import 'package:ai/widget/material_banned_dismiss.dart';
+import 'package:ai/widget/material_banner_dismiss.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
 

@@ -6,7 +6,7 @@ import 'package:ai/service/conversations_service.dart';
 import 'package:ai/storage/user_storage.dart';
 import 'package:ai/widget/custom_alert_dialog.dart';
 import 'package:ai/widget/custom_future_builder.dart';
-import 'package:ai/widget/material_banned_dismiss.dart';
+import 'package:ai/widget/material_banner_dismiss.dart';
 import 'package:ai/widget/message_item.dart';
 import 'package:ai/widget/rounded_button.dart';
 import 'package:flutter/material.dart';
