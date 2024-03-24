@@ -1,19 +1,19 @@
-FROM ubuntu:24.04 as llama-builder
-RUN apt-get update && apt-get install build-essential -y
+FROM ubuntu:22.04 as llama-builder
+RUN apt update && apt install -y build-essential
 WORKDIR /llama
 COPY ./llm/llama/llama.cpp .
 RUN make
 
-FROM golang:1.22.0 as llm-builder
+FROM golang:1.22.0-alpine3.18 as llm-builder
 WORKDIR /ai
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /bin/llm ./cmd/llm
 
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 ARG MODEL_URL
-RUN apt-get update && apt-get install wget htop -y && mkdir /models
+RUN apt update && apt install -y wget htop && mkdir /models
 RUN wget -O /models/model $MODEL_URL
 COPY --from=llama-builder /llama/server /bin/llama/server
 COPY --from=llm-builder /bin/llm /bin/llm

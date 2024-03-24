@@ -1,10 +1,10 @@
-FROM golang:1.22.0 as builder
+FROM golang:1.22.0-alpine3.18 as builder
 WORKDIR /ai
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /bin/ai ./cmd/ai
 
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 COPY --from=builder /bin/ai /bin/ai
 ENTRYPOINT ["/bin/ai"]
